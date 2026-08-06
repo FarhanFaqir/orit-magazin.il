@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ישראל מגזין | ניהול</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0f0f0f;--paper:#f7f5f0;--mid:#6b6560;--line:#e0dbd3;--red:#c8352a;--white:#fff;--green:#2e7d52}
+body{font-family:'Heebo',sans-serif;background:var(--paper);color:var(--ink);direction:rtl;min-height:100vh}
+
+.admin-header{background:var(--ink);color:var(--white);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.admin-logo{font-size:1.2rem;font-weight:900}
+        
+.admin-logo span{color:var(--red)}
+        
+.admin-logo small{font-size:0.7rem;color:#888;margin-right:8px;font-weight:400}
+        
+.back-link{font-size:0.82rem;color:#aaa;text-decoration:none}
+.back-link:hover{color:white}
+
+.admin-body{display:grid;grid-template-columns:490px 1fr;min-height:calc(100vh - 56px)}
+
+.form-panel{background:var(--white);border-left:1px solid var(--line);padding:1.5rem;overflow-y:auto;position:sticky;top:0;height:calc(100vh - 56px)}
+.form-panel h2{font-size:0.95rem;font-weight:700;letter-spacing:1px;margin-bottom:1.2rem;padding-bottom:0.8rem;border-bottom:2px solid var(--ink)}
+
+.field{margin-bottom:1rem}
+label{display:block;font-size:0.72rem;font-weight:700;letter-spacing:0.5px;color:var(--mid);margin-bottom:0.3rem;text-transform:uppercase}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);background:var(--paper);font-family:'Heebo',sans-serif;font-size:0.9rem;color:var(--ink);direction:rtl;outline:none;transition:border-color 0.2s;border-radius:2px}
+input:focus,select:focus,textarea:focus{border-color:var(--ink);background:white}
+textarea{resize:vertical;line-height:1.6}
+.hint{font-size:0.72rem;color:var(--mid);margin-top:0.3rem}
+
+/* MEDIA TABS */
+.media-tabs{display:flex;margin-bottom:0.6rem}
+.media-tab{flex:1;padding:7px;text-align:center;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--mid);transition:all 0.15s}
+.media-tab.active{background:var(--ink);color:white;border-color:var(--ink)}
+
+/* IMAGE UPLOAD */
+.img-upload-area{border:2px dashed var(--line);background:var(--paper);padding:1.2rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;border-radius:2px;min-height:80px;display:flex;align-items:center;justify-content:center}
+.img-upload-area:hover{border-color:var(--ink);background:white}
+.img-upload-area.has-img{border-style:solid;border-color:var(--green);padding:0}
+.img-file-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-preview{width:100%;max-height:150px;object-fit:cover;display:none}
+.img-upload-label{font-size:0.85rem;color:var(--mid);pointer-events:none}
+.img-upload-label span{display:block;font-size:1.8rem;margin-bottom:0.3rem}
+.img-remove{position:absolute;top:6px;left:6px;background:var(--red);color:white;border:none;width:24px;height:24px;border-radius:50%;font-size:0.75rem;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:2;line-height:1}
+.has-img .img-remove{display:flex}
+
+/* EMOJI */
+.emoji-picker{display:flex;flex-wrap:wrap;gap:5px;margin-top:0.3rem}
+.emoji-btn{width:34px;height:34px;border:2px solid var(--line);background:var(--paper);font-size:1.1rem;cursor:pointer;border-radius:3px;transition:border-color 0.15s;display:flex;align-items:center;justify-content:center}
+.emoji-btn.selected{border-color:var(--ink);background:white}
+
+/* TOOLBAR */
+.editor-toolbar{display:flex;flex-wrap:wrap;gap:3px;padding:6px;background:var(--paper);border:1px solid var(--line);border-bottom:none;border-radius:2px 2px 0 0}
+.tb-btn{min-width:32px;height:30px;padding:0 6px;border:1px solid var(--line);background:white;font-family:'Heebo',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;color:var(--ink);border-radius:2px;transition:all 0.15s;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.tb-btn:hover{background:var(--ink);color:white;border-color:var(--ink)}
+.tb-sep{width:1px;background:var(--line);margin:2px 3px}
+
+/* EDITOR */
+.editor-area{min-height:200px;max-height:320px;overflow-y:auto;border:1px solid var(--line);border-radius:0 0 2px 2px;padding:12px;background:white;outline:none;font-family:'Heebo',sans-serif;font-size:0.95rem;line-height:1.7;direction:rtl;text-align:right}
+.editor-area:focus{border-color:var(--ink)}
+.editor-area h2{font-size:1.3rem;font-weight:700;margin:0.8rem 0 0.4rem}
+.editor-area h3{font-size:1.1rem;font-weight:700;margin:0.6rem 0 0.3rem}
+.editor-area p{margin-bottom:0.6rem}
+.editor-area ul,.editor-area ol{padding-right:1.5rem;margin-bottom:0.6rem}
+.editor-area blockquote{border-right:3px solid var(--red);padding-right:12px;color:var(--mid);font-style:italic;margin:0.6rem 0}
+.editor-area img{max-width:100%;border-radius:2px;margin:0.5rem 0}
+.html-area{display:none;min-height:200px;max-height:320px;border:1px solid var(--line);border-radius:0 0 2px 2px;padding:12px;background:#1a1a1a;color:#f0f0f0;font-family:monospace;font-size:0.82rem;direction:ltr;text-align:left;outline:none;resize:vertical;overflow-y:auto;white-space:pre-wrap;width:100%}
+.editor-footer{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:var(--paper);border:1px solid var(--line);border-top:none;font-size:0.72rem;color:var(--mid)}
+.mode-toggle{font-size:0.72rem;font-weight:700;color:var(--mid);cursor:pointer;padding:3px 8px;border:1px solid var(--line);background:white;border-radius:2px;transition:all 0.15s}
+.mode-toggle:hover{border-color:var(--ink);color:var(--ink)}
+.color-chip{padding:5px 12px;border:2px solid transparent;border-radius:20px;font-size:0.78rem;font-weight:700;color:white;cursor:pointer;transition:all 0.15s;position:relative}
+.color-chip.active{border-color:#0f0f0f;box-shadow:0 0 0 2px white,0 0 0 4px #0f0f0f}
+.block-btn{font-size:0.75rem !important}padding:0 6px;border:1px solid var(--line);background:white;font-family:'Heebo',sans-serif;font-size:0.78rem;color:var(--ink);cursor:pointer;border-radius:2px;outline:none;max-width:90px}
+.tb-select:hover{border-color:var(--ink)}
+.tb-color-wrap{display:flex;align-items:center;gap:3px;height:30px;padding:0 6px;border:1px solid var(--line);background:white;font-size:0.78rem;font-weight:700;cursor:pointer;border-radius:2px}
+.tb-color-wrap input[type=color]{width:20px;height:18px;border:none;padding:0;cursor:pointer;background:none}
+.editor-toolbar{border-left:1px solid var(--line);border-right:1px solid var(--line)}
+
+.featured-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.featured-row input{width:auto}
+.featured-row label{margin:0;font-size:0.9rem;text-transform:none;color:var(--ink)}
+
+.btn-primary{width:100%;padding:13px;background:var(--ink);color:white;border:none;font-family:'Heebo',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:background 0.2s;margin-top:0.4rem}
+.btn-primary:hover{background:var(--green)}
+.btn-reset{width:100%;padding:9px;background:transparent;color:var(--mid);border:1px solid var(--line);font-family:'Heebo',sans-serif;font-size:0.82rem;cursor:pointer;margin-top:0.4rem;transition:all 0.2s}
+.btn-reset:hover{border-color:var(--mid);color:var(--ink)}
+
+/* LIST */
+.list-panel{padding:1.5rem;overflow-y:auto}
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;padding-bottom:0.8rem;border-bottom:2px solid var(--ink)}
+.list-header h2{font-size:0.95rem;font-weight:700;letter-spacing:1px}
+.list-count{font-size:0.8rem;color:var(--mid)}
+.article-row{background:white;border:1px solid var(--line);padding:0.9rem 1rem;margin-bottom:0.5rem;display:grid;grid-template-columns:60px 1fr auto;gap:0.8rem;align-items:center;transition:border-color 0.2s}
+.article-row:hover{border-color:var(--ink)}
+.row-thumb{width:60px;height:45px;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;overflow:hidden}
+.row-thumb img{width:100%;height:100%;object-fit:cover}
+.row-title{font-size:0.9rem;font-weight:700;margin-bottom:0.2rem;line-height:1.3}
+.row-meta{font-size:0.72rem;color:var(--mid);display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center}
+.row-cat{font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;background:var(--paper);border:1px solid var(--line)}
+.featured-badge{font-size:0.65rem;font-weight:700;padding:2px 6px;background:#fff3cd;border:1px solid #ffc107;color:#856404}
+.row-actions{display:flex;gap:4px;flex-direction:column}
+.btn-sm{padding:4px 10px;background:transparent;border:1px solid var(--line);font-family:'Heebo',sans-serif;font-size:0.72rem;cursor:pointer;color:var(--ink);transition:all 0.15s;white-space:nowrap;text-align:center;text-decoration:none;display:block}
+.btn-sm:hover{border-color:var(--ink);background:var(--paper)}
+.btn-sm.del{border-color:#fcc;color:var(--red)}
+.btn-sm.del:hover{background:#fff0f0;border-color:var(--red)}
+.btn-sm.view{border-color:#cce;color:#336}
+.btn-sm.view:hover{background:#f0f0ff}
+
+/* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center}
+.modal-box{background:white;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;border-radius:3px;direction:rtl;box-shadow:0 8px 40px rgba(0,0,0,0.3)}
+.modal-header{padding:1.1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:white;z-index:1;border-bottom:2px solid var(--ink)}
+.modal-header.red{border-bottom-color:var(--red)}
+.modal-header strong{font-size:0.95rem}
+.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:#888;line-height:1}
+.modal-body{padding:1.3rem 1.5rem;display:flex;flex-direction:column;gap:1rem}
+.modal-footer{padding:0 1.5rem 1.3rem;display:flex;gap:0.6rem}
+.modal-input{width:100%;padding:10px;border:1px solid var(--line);font-family:monospace;font-size:0.82rem;direction:ltr;text-align:left;background:#1a1a1a;color:#f0f0f0;outline:none;resize:vertical;line-height:1.6;border-radius:2px}
+.modal-text-input{width:100%;padding:9px 11px;border:1px solid var(--line);font-family:'Heebo',sans-serif;font-size:0.9rem;direction:rtl;outline:none;border-radius:2px}
+.modal-text-input:focus{border-color:var(--ink)}
+.modal-label{font-size:0.72rem;font-weight:700;color:var(--mid);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:0.4rem;display:block}
+.modal-hint{font-size:0.72rem;color:var(--mid);margin-top:0.4rem}
+.btn-modal{flex:1;padding:11px;border:none;font-family:'Heebo',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer}
+.btn-modal.dark{background:var(--ink);color:white}
+.btn-modal.dark:hover{background:var(--green)}
+.btn-modal.red-btn{background:var(--red);color:white}
+.btn-modal.red-btn:hover{background:#a62820}
+.btn-modal.cancel{background:transparent;color:var(--mid);border:1px solid var(--line);flex:0;padding:11px 18px}
+
+/* TRIGGER OPTIONS */
+.trigger-option{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);cursor:pointer;border-radius:2px;margin-bottom:0.4rem;transition:border-color 0.15s}
+.trigger-option:hover{border-color:var(--mid)}
+.trigger-option input[type=radio]{width:auto;flex-shrink:0}
+.trigger-num{width:52px;padding:3px 6px;border:1px solid var(--line);font-family:'Heebo',sans-serif;font-size:0.85rem;text-align:center;direction:ltr;display:inline-block;border-radius:2px;margin:0 4px}
+
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green);color:white;padding:11px 22px;font-size:0.88rem;font-weight:600;transition:transform 0.4s;z-index:9999;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:900px){.admin-body{grid-template-columns:1fr}.form-panel{position:static;height:auto}}
+
+  /* TOOLS SECTION */
+  .tools-section {
+    background: #f5f5f5;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 4px;
+    border-top: 3px solid var(--ink);
+  }
+  
+  .tools-section h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 15px;
+  }
+  
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  
+  .tool-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tool-btn:hover {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+  
+  .tool-icon {
+    font-size: 1.2rem;
+  }
+
+
+  /* ===== TOOLS SECTION ===== */
+  .tools-section {
+    background: linear-gradient(90deg, #f5f5f5 0%, #fff 100%);
+    padding: 12px 20px !important;
+    margin-top: 0 !important;
+    margin-bottom: 20px;
+    border-radius: 0;
+    border-top: 1px solid #ddd !important;
+    border-bottom: 1px solid #ddd !important;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .tools-section h3 {
+    display: inline-block;
+    margin: 0 !important;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #666;
+    white-space: nowrap;
+  }
+
+  .tools-grid {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px !important;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.8rem !important;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tool-btn:hover {
+    background: #333;
+    color: white;
+    border-color: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .tool-icon {
+    font-size: 1rem;
+  }
+  /* ===== END TOOLS ===== */
+
+</style>
+</head>
+<body>
+
+<div class="admin-header">
+  <div class="admin-logo">ישראל<span>מגזין</span><small>ממשק ניהול</small></div>
+        <div style="display: flex; gap: 10px; font-size: 0.85rem;">
+          <a href="full-code-editor.html" style="color: #aaa; text-decoration: none;">💻 עורך קוד</a>
+          <a href="code-manager.html" style="color: #aaa; text-decoration: none;">📊 קודים</a>
+          <a href="style-editor.html" style="color: #aaa; text-decoration: none;">🎨 עיצוב</a>
+          <a href="backup.html" style="color: #aaa; text-decoration: none;">💾 גיבוי</a>
+        </div>
+  <a href="../index.html" class="back-link">← חזרה לאתר</a>
+</div>
+
+<div class="admin-body">
+
+  <!-- FORM PANEL -->
+  <div class="form-panel">
+    <h2 id="form-title">➕ הוספת כתבה חדשה</h2>
+    <input type="hidden" id="edit-id">
+
+    <div class="field">
+      <label>כותרת *</label>
+      <input type="text" id="f-title" placeholder="כותרת מושכת...">
+    </div>
+
+    <div class="field">
+      <label>קטגוריה *</label>
+      <select id="f-cat">
+        <option value="">בחר...</option>
+        <option value='נדל"ן'>נדל"ן</option>
+        <option value="קוסמטיקה">קוסמטיקה</option>
+        <option value="בריאות">בריאות</option>
+        <option value="לייף סטייל">לייף סטייל</option>
+        <option value="שיווק">שיווק</option>
+      </select>
+    </div>
+
+    <!-- MEDIA -->
+    <div class="field">
+      <label>תמונה ראשית</label>
+      <div class="media-tabs">
+        <div class="media-tab active" onclick="switchMedia('image')">📷 תמונה</div>
+        <div class="media-tab" onclick="switchMedia('emoji')">😀 אמוג'י</div>
+      </div>
+
+      <div id="tab-image">
+        <div class="img-upload-area" id="upload-area">
+          <input type="file" accept="image/*" class="img-file-input" id="img-file" onchange="handleImageUpload(this)">
+          <button type="button" class="img-remove" id="img-remove-btn" onclick="removeImage(event)">✕</button>
+          <img class="img-preview" id="img-preview" alt="">
+          <div class="img-upload-label" id="upload-label">
+            <span>🖼️</span>לחצי לבחירת תמונה
+          </div>
+        </div>
+        <input type="hidden" id="f-image" value="">
+        <div class="hint">JPG, PNG, WEBP — מומלץ 1200×600</div>
+      </div>
+
+      <div id="tab-emoji" style="display:none">
+        <div class="emoji-picker" id="emoji-picker"></div>
+        <input type="hidden" id="f-emoji" value="📝">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>תקציר *</label>
+      <textarea id="f-excerpt" rows="2" placeholder="משפט-שניים שמופיעים בדף הבית..."></textarea>
+    </div>
+
+    <!-- RICH TEXT EDITOR -->
+    <div class="field">
+      <label>תוכן הכתבה *</label>
+
+      <!-- ROW 1: FONT / SIZE / COLOR -->
+      <div class="editor-toolbar" style="border-bottom:1px solid var(--line);border-radius:2px 2px 0 0">
+        <select class="tb-select" onchange="fmt('fontName',this.value)" title="גופן">
+          <option value="Heebo">Heebo</option>
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier</option>
+          <option value="Tahoma">Tahoma</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+        <select class="tb-select" onchange="setFontSize(this.value)" title="גודל" style="max-width:110px">
+          <option value="">גודל</option>
+          <optgroup label="— px —">
+            <option value="10px">10px</option>
+            <option value="12px">12px</option>
+            <option value="14px">14px</option>
+            <option value="16px">16px</option>
+            <option value="18px">18px</option>
+            <option value="20px">20px</option>
+            <option value="24px">24px</option>
+            <option value="28px">28px</option>
+            <option value="32px">32px</option>
+            <option value="40px">40px</option>
+            <option value="48px">48px</option>
+          </optgroup>
+          <optgroup label="— pt —">
+            <option value="8pt">8pt</option>
+            <option value="9pt">9pt</option>
+            <option value="10pt">10pt</option>
+            <option value="11pt">11pt</option>
+            <option value="12pt">12pt</option>
+            <option value="14pt">14pt</option>
+            <option value="16pt">16pt</option>
+            <option value="18pt">18pt</option>
+            <option value="20pt">20pt</option>
+            <option value="24pt">24pt</option>
+            <option value="28pt">28pt</option>
+            <option value="36pt">36pt</option>
+            <option value="48pt">48pt</option>
+            <option value="72pt">72pt</option>
+          </optgroup>
+        </select>
+        <select class="tb-select" onchange="setLineHeight(this.value)" title="רווח שורות">
+          <option value="">רווח</option>
+          <option value="1">1</option>
+          <option value="1.4">1.4</option>
+          <option value="1.6">1.6</option>
+          <option value="1.8">1.8</option>
+          <option value="2">2</option>
+          <option value="2.5">2.5</option>
+        </select>
+        <select class="tb-select" onchange="setLetterSpacing(this.value)" title="צפיפות אותיות">
+          <option value="">צפיפות</option>
+          <option value="-2px">-2</option>
+          <option value="-1px">-1</option>
+          <option value="0px">0</option>
+          <option value="1px">+1</option>
+          <option value="2px">+2</option>
+          <option value="4px">+4</option>
+        </select>
+        <div class="tb-sep"></div>
+        <label class="tb-color-wrap" title="צבע טקסט">
+          A <input type="color" id="txt-color" value="#000000" oninput="applyColor('foreColor',this.value)">
+        </label>
+        <label class="tb-color-wrap" title="צבע רקע">
+          🖊 <input type="color" id="bg-color" value="#ffff00" oninput="applyColor('hiliteColor',this.value)">
+        </label>
+      </div>
+
+      <!-- ROW 2: STYLE / ALIGN / LISTS / BLOCKS -->
+      <div class="editor-toolbar" style="border-top:none;border-bottom:1px solid var(--line)">
+        <button type="button" class="tb-btn" onclick="fmt('bold')"><b>B</b></button>
+        <button type="button" class="tb-btn" onclick="fmt('italic')"><i>I</i></button>
+        <button type="button" class="tb-btn" onclick="fmt('underline')"><u>U</u></button>
+        <button type="button" class="tb-btn" onclick="fmt('strikeThrough')"><s>S</s></button>
+        <button type="button" class="tb-btn" onclick="fmt('superscript')">X²</button>
+        <button type="button" class="tb-btn" onclick="fmt('subscript')">X₂</button>
+        <div class="tb-sep"></div>
+        <button type="button" class="tb-btn" onclick="fmt('justifyRight')" title="יישור ימין">⇥</button>
+        <button type="button" class="tb-btn" onclick="fmt('justifyCenter')" title="מרכז">≡</button>
+        <button type="button" class="tb-btn" onclick="fmt('justifyLeft')" title="יישור שמאל">⇤</button>
+        <button type="button" class="tb-btn" onclick="fmt('justifyFull')" title="מלא">⇔</button>
+        <div class="tb-sep"></div>
+        <button type="button" class="tb-btn" onclick="fmtBlock('h1')">H1</button>
+        <button type="button" class="tb-btn" onclick="fmtBlock('h2')">H2</button>
+        <button type="button" class="tb-btn" onclick="fmtBlock('h3')">H3</button>
+        <button type="button" class="tb-btn" onclick="fmtBlock('p')">¶</button>
+        <button type="button" class="tb-btn" onclick="fmtBlock('blockquote')">"</button>
+        <div class="tb-sep"></div>
+        <button type="button" class="tb-btn" onclick="fmt('insertUnorderedList')">• —</button>
+        <button type="button" class="tb-btn" onclick="fmt('insertOrderedList')">1.</button>
+        <button type="button" class="tb-btn" onclick="fmt('indent')" title="הזחה">→</button>
+        <button type="button" class="tb-btn" onclick="fmt('outdent')" title="הסר הזחה">←</button>
+        <div class="tb-sep"></div>
+        <button type="button" class="tb-btn" onclick="fmt('removeFormat')" title="נקה עיצוב">✕ עיצוב</button>
+      </div>
+
+      <!-- ROW 3: INSERT -->
+      <div class="editor-toolbar" style="border-top:none;border-bottom:1px solid var(--line);border-radius:0">
+        <button type="button" class="tb-btn" onclick="insertLink()">🔗 קישור</button>
+        <button type="button" class="tb-btn" onclick="insertHR()">— קו מפריד</button>
+        <button type="button" class="tb-btn" onclick="document.getElementById('inline-img-input').click()">🖼 תמונה</button>
+        <input type="file" class="tb-file-input" id="inline-img-input" accept="image/*" onchange="insertInlineImage(this)">
+        <div class="tb-sep"></div>
+        <button type="button" class="tb-btn" style="background:#1a1a1a;color:white;border-color:#1a1a1a" onclick="saveCursor();openFormEmbed()">📋 טופס מוטמע</button>
+        <button type="button" class="tb-btn" style="background:#2d6a9f;color:white;border-color:#2d6a9f;position:relative" onclick="openSheetsConfig()">📊 Sheets<span id="sheets-status-dot" style="position:absolute;width:8px;height:8px;background:#c8352a;border-radius:50%;right:4px;bottom:4px;border:1px solid white"></span></button>
+        <button type="button" class="tb-btn" style="background:var(--red);color:white;border-color:var(--red)" onclick="saveCursor();openPopupEmbed()">🪟 פופאפ</button>
+        <div class="tb-sep"></div>
+        <button type="button" class="tb-btn" onclick="fmt('undo')">↩</button>
+        <button type="button" class="tb-btn" onclick="fmt('redo')">↪</button>
+      </div>
+
+      <!-- ROW 4: BLOCKS -->
+      <div class="editor-toolbar" style="border-top:none;border-radius:0;background:#fff8f0">
+        <span style="font-size:0.68rem;font-weight:800;color:#e8762a;letter-spacing:1px;text-transform:uppercase;padding:0 4px;align-self:center">בלוקים:</span>
+        <button type="button" class="tb-btn block-btn" onclick="saveCursor();openBlockModal('cta')" title="כפתור קריאה לפעולה" style="background:#c8352a;color:white;border-color:#c8352a">🔴 כפתור CTA</button>
+        <button type="button" class="tb-btn block-btn" onclick="saveCursor();openBlockModal('tip')" title="בלוק טיפ צבעוני" style="background:#e8762a;color:white;border-color:#e8762a">💡 טיפ</button>
+        <button type="button" class="tb-btn block-btn" onclick="saveCursor();openBlockModal('steps')" title="רשימה ממוספרת" style="background:#2d6a9f;color:white;border-color:#2d6a9f">🔢 שלבים</button>
+        <button type="button" class="tb-btn block-btn" onclick="saveCursor();openBlockModal('quote')" title="ציטוט/המלצה" style="background:#3a8c5c;color:white;border-color:#3a8c5c">⭐ ציטוט</button>
+      </div>
+
+      <div class="editor-area" id="editor" contenteditable="true" dir="rtl" oninput="syncToHtml()"></div>
+      <textarea class="html-area" id="html-area" dir="ltr" oninput="syncFromHtml()"></textarea>
+      <div class="editor-footer">
+        <span id="char-count">0 תווים</span>
+        <button type="button" class="mode-toggle" id="mode-btn" onclick="toggleMode()">‹/› HTML</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="field">
+        <label>תאריך</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="field">
+        <label>זמן קריאה (דקות)</label>
+        <input type="number" id="f-read" value="5" min="1" max="60">
+      </div>
+    </div>
+
+    <div class="featured-row">
+      <input type="checkbox" id="f-featured">
+      <label for="f-featured">⭐ כתבה מומלצת (הירו)</label>
+    </div>
+
+    <button type="button" class="btn-primary" onclick="saveArticle()">💾 שמור כתבה</button>
+    <button type="button" class="btn-reset" onclick="resetForm()">✕ נקה טופס</button>
+  </div>
+
+  <!-- LIST PANEL -->
+  
+  
+  <!-- TOOLS SECTION -->
+  <div class="tools-section">
+    <h3>🛠️ כלים</h3>
+    <div class="tools-grid">
+      <a href="full-code-editor.html" class="tool-btn">
+        <span class="tool-icon">💻</span>
+        <span>עורך קוד</span>
+      </a>
+      <a href="code-manager.html" class="tool-btn">
+        <span class="tool-icon">📊</span>
+        <span>קודים</span>
+      </a>
+      <a href="style-editor.html" class="tool-btn">
+        <span class="tool-icon">🎨</span>
+        <span>עיצוב</span>
+      </a>
+      <a href="backup.html" class="tool-btn">
+        <span class="tool-icon">💾</span>
+        <span>גיבוי</span>
+      </a>
+    </div>
+  </div>
+
+<div class="list-panel">
+    <div class="list-header">
+      <h2>כל הכתבות</h2>
+      <span class="list-count" id="list-count"></span>
+    </div>
+    <div id="articles-list"></div>
+  </div>
+</div>
+
+<!-- MODAL: BLOCKS -->
+<div class="modal-overlay" id="block-modal">
+  <div class="modal-box" style="width:480px">
+    <div class="modal-header" id="block-modal-header">
+      <strong id="block-modal-title">הכנס בלוק</strong>
+      <button type="button" class="modal-close" onclick="closeBlockModal()">✕</button>
+    </div>
+    <div class="modal-body" id="block-modal-body"></div>
+    <div class="modal-footer">
+      <button type="button" class="btn-modal dark" id="block-insert-btn" onclick="insertBlock()">הכנס בלוק ✓</button>
+      <button type="button" class="btn-modal cancel" onclick="closeBlockModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="form-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <strong>📋 הטמעת טופס בכתבה</strong>
+      <button type="button" class="modal-close" onclick="closeFormEmbed()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- רשימת טפסים קיימים -->
+      <div id="form-existing-section" style="display:none">
+        <label class="modal-label">טפסים בכתבה הנוכחית</label>
+        <div id="form-existing-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:0.5rem"></div>
+      </div>
+      <!-- הוספת טופס חדש -->
+      <div>
+        <label class="modal-label">הדבק קוד טופס חדש (HTML / iframe)</label>
+        <textarea class="modal-input" id="form-code-input" rows="7"
+          placeholder='<iframe src="https://docs.google.com/forms/..." width="100%" height="500"></iframe>'></textarea>
+        <div class="modal-hint">מתאים ל: Google Forms, JotForm, Typeform, WhatsApp, HTML רגיל</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <label class="modal-label" style="margin:0;white-space:nowrap">גובה (px)</label>
+        <input type="number" class="modal-text-input" id="form-height-input" value="500" min="100" max="2000" style="width:100px">
+        <span style="font-size:0.75rem;color:#888">השאירי ריק לגובה אוטומטי</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-modal dark" onclick="insertFormEmbed()">הכנס לכתבה ✓</button>
+      <button type="button" class="btn-modal cancel" onclick="closeFormEmbed()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: POPUP EMBED -->
+<div class="modal-overlay" id="popup-modal">
+  <div class="modal-box">
+    <div class="modal-header red">
+      <strong>🪟 הגדרת פופאפ לכתבה</strong>
+      <button type="button" class="modal-close" onclick="closePopupEmbed()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- רשימת פופאפים קיימים -->
+      <div id="popup-existing-section" style="display:none">
+        <label class="modal-label">פופאפים בכתבה הנוכחית</label>
+        <div id="popup-existing-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:0.5rem"></div>
+      </div>
+
+      <div>
+        <label class="modal-label">מתי הפופאפ יקפוץ?</label>
+
+        <label class="trigger-option">
+          <input type="radio" name="popup-trigger" value="seconds" onchange="showTriggerOptions(this.value)">
+          ⏱ אחרי
+          <input type="number" class="trigger-num" id="popup-seconds" value="5" min="1" max="120" onclick="event.stopPropagation()">
+          שניות בדף
+        </label>
+
+        <label class="trigger-option">
+          <input type="radio" name="popup-trigger" value="scroll" onchange="showTriggerOptions(this.value)">
+          📜 אחרי גלילה של
+          <input type="number" class="trigger-num" id="popup-scroll" value="50" min="1" max="100" onclick="event.stopPropagation()">
+          % מהכתבה
+        </label>
+
+        <label class="trigger-option">
+          <input type="radio" name="popup-trigger" value="exit" onchange="showTriggerOptions(this.value)">
+          🚪 כשמנסה לצאת מהדף (Exit Intent)
+        </label>
+
+        <label class="trigger-option">
+          <input type="radio" name="popup-trigger" value="button" onchange="showTriggerOptions(this.value)" checked>
+          🖱 לחיצה על כפתור שאני שמה בכתבה
+        </label>
+      </div>
+
+      <div id="popup-btn-section">
+        <label class="modal-label">טקסט הכפתור</label>
+        <input type="text" class="modal-text-input" id="popup-btn-text" placeholder="לדוגמה: קבלי ייעוץ חינם / השאירי פרטים / הצטרפי עכשיו">
+      </div>
+
+      <div>
+        <label class="modal-label">קוד הטופס (HTML / iframe) *</label>
+        <div style="margin-bottom:0.6rem;display:flex;gap:0.5rem;align-items:center">
+          <label style="display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line);background:var(--paper);cursor:pointer;font-size:0.8rem;font-weight:700;color:var(--mid);border-radius:2px;transition:all 0.15s;white-space:nowrap">
+            📂 העלה קובץ HTML
+            <input type="file" accept=".html,.htm" style="display:none" onchange="loadHtmlFile(this)">
+          </label>
+          <span style="font-size:0.72rem;color:var(--mid)">או הדבק קוד ידנית למטה</span>
+        </div>
+        <textarea class="modal-input" id="popup-code-input" rows="6"
+          placeholder='<iframe src="https://docs.google.com/forms/..." width="100%" height="480" frameborder="0"></iframe>&#10;&#10;— או —&#10;&#10;כל קוד HTML של טופס שלך'></textarea>
+        <div class="modal-hint">Google Forms · JotForm · Typeform · HTML מותאם · קובץ שלך — הכל עובד</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-modal red-btn" onclick="insertPopupEmbed()">הכנס פופאפ ✓</button>
+      <button type="button" class="btn-modal cancel" onclick="closePopupEmbed()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../js/articles.js">
+document.getElementById('sheets-modal').addEventListener('click', function(e){ 
+  if(e.target===this) closeSheetsConfig(); 
+});
+</script>
+<script>
+// ── AUTH ──
+(function(){
+  var PASS = '3426', KEY = 'pulsar_admin_auth';
+  if (sessionStorage.getItem(KEY) === 'ok') return;
+  var p = prompt('🔐 סיסמת ניהול:');
+  if (p === PASS) { sessionStorage.setItem(KEY, 'ok'); }
+  else {
+    document.body.innerHTML = '<div style="text-align:center;padding:4rem;font-family:sans-serif"><h2 style="color:#c8352a">גישה נדחתה</h2><p style="margin-top:1rem"><a href="../index.html">← חזרה לאתר</a></p></div>';
+    throw new Error('Unauthorized');
+  }
+})();
+
+// ── EMOJI ──
+var EMOJIS = ['📝','🏙️','🏗️','📊','🏠','✨','💆‍♀️','🧴','💄','🧠','🏃‍♀️','😴','☀️','🌊','📱','🎯','✍️','💰','💡','🔑','🌿','🍎','💪','🧘','🏡','🌺','💎','🔥','⭐','🎉'];
+document.getElementById('emoji-picker').innerHTML = EMOJIS.map(function(e){
+  return '<button type="button" class="emoji-btn' + (e==='📝'?' selected':'') + '" onclick="selectEmoji(\'' + e + '\')">' + e + '</button>';
+}).join('');
+
+function selectEmoji(e) {
+  document.getElementById('f-emoji').value = e;
+  document.querySelectorAll('.emoji-btn').forEach(function(b){ b.classList.toggle('selected', b.textContent.trim()===e); });
+}
+
+// ── MEDIA TABS ──
+var mediaMode = 'image';
+function switchMedia(mode) {
+  mediaMode = mode;
+  document.querySelectorAll('.media-tab').forEach(function(t,i){ t.classList.toggle('active',(i===0&&mode==='image')||(i===1&&mode==='emoji')); });
+  document.getElementById('tab-image').style.display = mode==='image' ? '' : 'none';
+  document.getElementById('tab-emoji').style.display = mode==='emoji' ? '' : 'none';
+}
+
+// ── IMAGE UPLOAD ──
+function handleImageUpload(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var b64 = e.target.result;
+    document.getElementById('f-image').value = b64;
+    var prev = document.getElementById('img-preview');
+    prev.src = b64;
+    prev.style.display = 'block';
+    document.getElementById('upload-label').style.display = 'none';
+    document.getElementById('upload-area').classList.add('has-img');
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage(e) {
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  document.getElementById('f-image').value = '';
+  var prev = document.getElementById('img-preview');
+  prev.src = ''; prev.style.display = 'none';
+  document.getElementById('upload-label').style.display = '';
+  document.getElementById('upload-area').classList.remove('has-img');
+  document.getElementById('img-file').value = '';
+}
+
+// ── EDITOR ──
+var htmlMode = false;
+var editor = document.getElementById('editor');
+var htmlArea = document.getElementById('html-area');
+var savedRange = null;
+
+// שמירת מיקום הסמן — קרא לפני כל פתיחת מודל
+function saveCursor() {
+  var sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) {
+    var r = sel.getRangeAt(0);
+    // וודא שהסמן בתוך העורך
+    if (editor.contains(r.commonAncestorContainer)) {
+      savedRange = r.cloneRange();
+    }
+  }
+}
+
+// שחזור הסמן ו-insertHTML במיקום הנכון
+function insertAtCursor(html) {
+  editor.focus();
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  if (savedRange) {
+    sel.addRange(savedRange);
+  } else {
+    // אם אין savedRange — הכנס בסוף העורך
+    var r = document.createRange();
+    r.selectNodeContents(editor);
+    r.collapse(false);
+    sel.addRange(r);
+  }
+  document.execCommand('insertHTML', false, html);
+  savedRange = null;
+  syncToHtml();
+}
+
+function fmt(cmd, val) { editor.focus(); document.execCommand(cmd, false, val||null); syncToHtml(); }
+function fmtBlock(tag) { editor.focus(); document.execCommand('formatBlock',false,tag); syncToHtml(); }
+
+function setFontSize(size) {
+  if (!size) return;
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  var range = sel.getRangeAt(0);
+  if (range.collapsed) {
+    // No selection — apply to current block
+    var node = sel.anchorNode;
+    while (node && node !== editor && node.nodeType !== 1) node = node.parentNode;
+    if (node && node !== editor) { node.style.fontSize = size; syncToHtml(); }
+    return;
+  }
+  // Has selection — wrap in span
+  var span = document.createElement('span');
+  span.style.fontSize = size;
+  try {
+    range.surroundContents(span);
+  } catch(e) {
+    // Cross-element selection — extract and wrap
+    var frag = range.extractContents();
+    span.appendChild(frag);
+    range.insertNode(span);
+  }
+  // Restore selection
+  var newRange = document.createRange();
+  newRange.selectNodeContents(span);
+  sel.removeAllRanges();
+  sel.addRange(newRange);
+  syncToHtml();
+}
+
+function setLineHeight(val) {
+  if (!val) return;
+  editor.focus();
+  var sel = window.getSelection();
+  if (sel && sel.rangeCount) {
+    var node = sel.anchorNode;
+    while (node && node.nodeType !== 1) node = node.parentNode;
+    if (node && node !== editor) node.style.lineHeight = val;
+    else {
+      var p = document.createElement('p');
+      p.style.lineHeight = val;
+      p.appendChild(sel.getRangeAt(0).extractContents());
+      sel.getRangeAt(0).insertNode(p);
+    }
+    syncToHtml();
+  }
+}
+
+function setLetterSpacing(val) {
+  if (!val) return;
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  var range = sel.getRangeAt(0);
+  if (range.collapsed) {
+    var node = sel.anchorNode;
+    while (node && node !== editor && node.nodeType !== 1) node = node.parentNode;
+    if (node && node !== editor) { node.style.letterSpacing = val; syncToHtml(); }
+    return;
+  }
+  var span = document.createElement('span');
+  span.style.letterSpacing = val;
+  try { range.surroundContents(span); }
+  catch(e) { span.appendChild(range.extractContents()); range.insertNode(span); }
+  syncToHtml();
+}
+
+function applyColor(cmd, val) {
+  editor.focus();
+  document.execCommand(cmd, false, val);
+  syncToHtml();
+}
+
+function insertHR() {
+  insertAtCursor('<hr style="border:none;border-top:2px solid #e0dbd3;margin:1.5rem 0"><p></p>');
+}
+
+function insertLink() {
+  var url = prompt('הכנס כתובת URL:');
+  if (url) { editor.focus(); document.execCommand('createLink',false,url); syncToHtml(); }
+}
+function insertInlineImage(input) {
+  var file = input.files[0]; if (!file) return;
+  saveCursor();
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    insertAtCursor('<img src="'+e.target.result+'" style="max-width:100%;margin:0.5rem 0">');
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+function syncToHtml() {
+  htmlArea.value = editor.innerHTML;
+  document.getElementById('char-count').textContent = editor.innerText.length + ' תווים';
+}
+function syncFromHtml() { editor.innerHTML = htmlArea.value; }
+function toggleMode() {
+  htmlMode = !htmlMode;
+  if (htmlMode) {
+    htmlArea.value = editor.innerHTML;
+    htmlArea.style.display = 'block'; editor.style.display = 'none';
+    document.querySelector('.editor-toolbar').style.opacity = '0.4';
+    document.querySelector('.editor-toolbar').style.pointerEvents = 'none';
+    document.getElementById('mode-btn').textContent = '👁 ויזואלי';
+  } else {
+    editor.innerHTML = htmlArea.value;
+    editor.style.display = 'block'; htmlArea.style.display = 'none';
+    document.querySelector('.editor-toolbar').style.opacity = '1';
+    document.querySelector('.editor-toolbar').style.pointerEvents = '';
+    document.getElementById('mode-btn').textContent = '‹/› HTML';
+  }
+}
+
+// ── SAVE ──
+document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+
+function saveArticle() {
+  var title    = document.getElementById('f-title').value.trim();
+  var cat      = document.getElementById('f-cat').value;
+  var excerpt  = document.getElementById('f-excerpt').value.trim();
+  var content  = htmlMode ? htmlArea.value.trim() : editor.innerHTML.trim();
+  var date     = document.getElementById('f-date').value;
+  var readTime = document.getElementById('f-read').value || '5';
+  var featured = document.getElementById('f-featured').checked;
+  var editId   = document.getElementById('edit-id').value;
+  var image    = document.getElementById('f-image').value;
+  var emoji    = document.getElementById('f-emoji').value || '📝';
+
+  if (!title || !cat || !excerpt || !content.replace(/<[^>]*>/g,'').trim()) {
+    alert('נא למלא: כותרת, קטגוריה, תקציר ותוכן'); return;
+  }
+  var data = { title:title, category:cat, emoji:emoji, image:image, excerpt:excerpt, content:content, date:date, readTime:readTime, featured:featured };
+  if (editId) { updateArticle(editId, data); showToast('✅ הכתבה עודכנה!'); }
+  else        { addArticle(data);            showToast('✅ הכתבה נוספה!'); }
+  resetForm(); renderList();
+}
+
+function resetForm() {
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-cat').value = '';
+  document.getElementById('f-excerpt').value = '';
+  document.getElementById('f-read').value = '5';
+  document.getElementById('f-featured').checked = false;
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  editor.innerHTML = ''; htmlArea.value = '';
+  removeImage(null);
+  selectEmoji('📝');
+  switchMedia('image');
+  if (htmlMode) toggleMode();
+  document.getElementById('form-title').textContent = '➕ הוספת כתבה חדשה';
+  document.getElementById('char-count').textContent = '0 תווים';
+}
+
+function editArticle(id) {
+  var a = getArticleById(id); if (!a) return;
+  document.getElementById('edit-id').value = a.id;
+  document.getElementById('f-title').value = a.title;
+  document.getElementById('f-cat').value = a.category;
+  document.getElementById('f-excerpt').value = a.excerpt;
+  document.getElementById('f-read').value = a.readTime;
+  document.getElementById('f-featured').checked = !!a.featured;
+  document.getElementById('f-date').value = a.date;
+  editor.innerHTML = a.content; htmlArea.value = a.content;
+  if (a.image) {
+    document.getElementById('f-image').value = a.image;
+    var prev = document.getElementById('img-preview');
+    prev.src = a.image; prev.style.display = 'block';
+    document.getElementById('upload-label').style.display = 'none';
+    document.getElementById('upload-area').classList.add('has-img');
+    switchMedia('image');
+  } else {
+    switchMedia('emoji');
+    selectEmoji(a.emoji || '📝');
+  }
+  document.getElementById('form-title').textContent = '✏️ עריכת כתבה';
+  syncToHtml();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function duplicateArticle(id, title) {
+  const articles = JSON.parse(localStorage.getItem("pulsar_articles") || "[]");
+  const original = articles.find(a => a.id === id);
+  if (!original) { alert("כתבה לא נמצאה"); return; }
+  const dup = {...original, id: String(Date.now()), title: original.title + " (העתק)", date: new Date().toISOString().split("T")[0], featured: false};
+  articles.push(dup);
+  localStorage.setItem("pulsar_articles", JSON.stringify(articles));
+  alert("✅ כתבה שוכפלה!");
+  location.reload();
+}
+function confirmDelete(id, title) {
+  if (confirm('למחוק:\n"' + title + '"?')) {
+    deleteArticle(id); renderList(); showToast('🗑️ נמחקה');
+  }
+}
+
+function renderList() {
+  var articles = getArticles();
+  document.getElementById('list-count').textContent = articles.length + ' כתבות';
+  if (!articles.length) {
+    document.getElementById('articles-list').innerHTML = '<p style="color:var(--mid);text-align:center;padding:3rem">אין כתבות עדיין.</p>';
+    return;
+  }
+  document.getElementById('articles-list').innerHTML = articles.map(function(a) {
+    var thumb = a.image
+      ? '<div class="row-thumb"><img src="'+a.image+'" alt=""></div>'
+      : '<div class="row-thumb">'+(a.emoji||'📝')+'</div>';
+    return '<div class="article-row">' + thumb +
+      '<div><div class="row-title">'+a.title+'</div>' +
+      '<div class="row-meta"><span class="row-cat" style="color:'+getCategoryColor(a.category)+'">'+a.category+'</span>' +
+      (a.featured?'<span class="featured-badge">⭐</span>':'')+
+      '<span>'+formatDate(a.date)+'</span></div></div>' +
+      '<div class="row-actions">' +
+      '<button class="btn-sm" onclick="editArticle(\''+a.id+'\')">✏️ ערוך</button>' +
+      '<a href="../article.html?id='+a.id+'" target="_blank" class="btn-sm view">👁 צפה</a>' +
+      '<button class="btn-sm del" onclick="confirmDelete(\''+a.id+'\',\''+a.title.replace(/'/g,"\\'")+ '\')">🗑 מחק</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// ── BLOCKS ──
+var currentBlockType = '';
+
+var blockConfigs = {
+  cta: {
+    title: '🔴 כפתור קריאה לפעולה',
+    color: '#c8352a',
+    fields: `
+      <div><label class="modal-label">טקסט הכפתור</label>
+      <input type="text" class="modal-text-input" id="bl-cta-text" placeholder="לדוגמה: קבלי ייעוץ חינם עכשיו ←" value="קבלי ייעוץ חינם עכשיו ←"></div>
+      <div><label class="modal-label">סוג קישור</label>
+      <select class="modal-text-input" id="bl-cta-type" onchange="updateCtaPlaceholder()" style="direction:rtl">
+        <option value="url">🔗 קישור רגיל (URL)</option>
+        <option value="whatsapp">💬 וואטסאפ</option>
+        <option value="tel">📞 טלפון</option>
+        <option value="mailto">✉️ אימייל</option>
+        <option value="none">🚫 בלי קישור (ויזואלי בלבד)</option>
+      </select></div>
+      <div id="bl-cta-url-wrap"><label class="modal-label" id="bl-cta-url-label">כתובת URL</label>
+      <input type="text" class="modal-text-input" id="bl-cta-url" placeholder="https://"></div>
+      <div id="bl-cta-wa-msg-wrap" style="display:none"><label class="modal-label">הודעה לוואטסאפ (אופציונלי)</label>
+      <input type="text" class="modal-text-input" id="bl-cta-wa-msg" placeholder="שלום, אני מעוניינת בפרטים נוספים..."></div>
+      <div><label class="modal-label">צבע רקע</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="color-chip" style="background:#c8352a" onclick="setChip('bl-cta-color','#c8352a',this)">אדום</button>
+        <button type="button" class="color-chip" style="background:#e8762a" onclick="setChip('bl-cta-color','#e8762a',this)">כתום</button>
+        <button type="button" class="color-chip" style="background:#2d6a9f" onclick="setChip('bl-cta-color','#2d6a9f',this)">כחול</button>
+        <button type="button" class="color-chip" style="background:#3a8c5c" onclick="setChip('bl-cta-color','#3a8c5c',this)">ירוק</button>
+        <button type="button" class="color-chip" style="background:#0f0f0f" onclick="setChip('bl-cta-color','#0f0f0f',this)">שחור</button>
+        <label class="color-chip" style="background:#eee;color:#333">בחר <input type="color" style="opacity:0;position:absolute;width:0" onchange="setChip('bl-cta-color',this.value,this.parentElement)"></label>
+      </div>
+      <input type="hidden" id="bl-cta-color" value="#c8352a"></div>
+      <div><label class="modal-label">יישור</label>
+      <select class="modal-text-input" id="bl-cta-align" style="direction:rtl">
+        <option value="center">מרכז</option>
+        <option value="right">ימין</option>
+        <option value="left">שמאל</option>
+      </select></div>`
+  },
+  tip: {
+    title: '💡 בלוק טיפ מעוצב',
+    color: '#e8762a',
+    fields: `
+      <div><label class="modal-label">כותרת הטיפ</label>
+      <input type="text" class="modal-text-input" id="bl-tip-title" placeholder="✨ טיפ מקצועי" value="✨ טיפ מקצועי"></div>
+      <div><label class="modal-label">תוכן הטיפ</label>
+      <textarea class="modal-text-input" id="bl-tip-text" rows="3" placeholder="כתבי את הטיפ כאן..." style="resize:vertical"></textarea></div>
+      <div><label class="modal-label">צבע</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="color-chip" style="background:#e8762a" onclick="setChip('bl-tip-color','#e8762a',this)">כתום</button>
+        <button type="button" class="color-chip" style="background:#c8352a" onclick="setChip('bl-tip-color','#c8352a',this)">אדום</button>
+        <button type="button" class="color-chip" style="background:#2d6a9f" onclick="setChip('bl-tip-color','#2d6a9f',this)">כחול</button>
+        <button type="button" class="color-chip" style="background:#3a8c5c" onclick="setChip('bl-tip-color','#3a8c5c',this)">ירוק</button>
+        <button type="button" class="color-chip" style="background:#9b4f72" onclick="setChip('bl-tip-color','#9b4f72',this)">סגול</button>
+        <label class="color-chip" style="background:#eee;color:#333">בחר <input type="color" style="opacity:0;position:absolute;width:0" onchange="setChip('bl-tip-color',this.value,this.parentElement)"></label>
+      </div>
+      <input type="hidden" id="bl-tip-color" value="#e8762a"></div>`
+  },
+  steps: {
+    title: '🔢 רשימה ממוספרת',
+    color: '#2d6a9f',
+    fields: `
+      <div><label class="modal-label">צבע עיגולים</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="color-chip" style="background:#2d6a9f" onclick="setChip('bl-steps-color','#2d6a9f',this)">כחול</button>
+        <button type="button" class="color-chip" style="background:#c8352a" onclick="setChip('bl-steps-color','#c8352a',this)">אדום</button>
+        <button type="button" class="color-chip" style="background:#e8762a" onclick="setChip('bl-steps-color','#e8762a',this)">כתום</button>
+        <button type="button" class="color-chip" style="background:#3a8c5c" onclick="setChip('bl-steps-color','#3a8c5c',this)">ירוק</button>
+        <button type="button" class="color-chip" style="background:#0f0f0f" onclick="setChip('bl-steps-color','#0f0f0f',this)">שחור</button>
+        <label class="color-chip" style="background:#eee;color:#333">בחר <input type="color" style="opacity:0;position:absolute;width:0" onchange="setChip('bl-steps-color',this.value,this.parentElement)"></label>
+      </div>
+      <input type="hidden" id="bl-steps-color" value="#2d6a9f"></div>
+      <div><label class="modal-label">שלבים (שורה אחת = שלב אחד)</label>
+      <textarea class="modal-text-input" id="bl-steps-text" rows="5" style="resize:vertical" placeholder="ייעוץ חינמי ובדיקת עור&#10;הכנה לטיפול&#10;הטיפול עצמו&#10;מעקב והחלמה"></textarea></div>`
+  },
+  quote: {
+    title: '⭐ בלוק ציטוט / המלצה',
+    color: '#3a8c5c',
+    fields: `
+      <div><label class="modal-label">הציטוט</label>
+      <textarea class="modal-text-input" id="bl-quote-text" rows="3" style="resize:vertical" placeholder="הטיפול שינה לי את החיים! תוך שבוע הנגע נעלם לחלוטין..."></textarea></div>
+      <div><label class="modal-label">שם + תפקיד (אופציונלי)</label>
+      <input type="text" class="modal-text-input" id="bl-quote-author" placeholder="שרה כ. — לקוחה מנתניה"></div>
+      <div><label class="modal-label">כוכבים</label>
+      <select class="modal-text-input" id="bl-quote-stars" style="direction:rtl">
+        <option value="⭐⭐⭐⭐⭐">5 כוכבים ⭐⭐⭐⭐⭐</option>
+        <option value="⭐⭐⭐⭐">4 כוכבים ⭐⭐⭐⭐</option>
+        <option value="">ללא כוכבים</option>
+      </select></div>
+      <div><label class="modal-label">צבע מסגרת</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="color-chip" style="background:#3a8c5c" onclick="setChip('bl-quote-color','#3a8c5c',this)">ירוק</button>
+        <button type="button" class="color-chip" style="background:#e8762a" onclick="setChip('bl-quote-color','#e8762a',this)">כתום</button>
+        <button type="button" class="color-chip" style="background:#c8352a" onclick="setChip('bl-quote-color','#c8352a',this)">אדום</button>
+        <button type="button" class="color-chip" style="background:#2d6a9f" onclick="setChip('bl-quote-color','#2d6a9f',this)">כחול</button>
+        <button type="button" class="color-chip" style="background:#9b4f72" onclick="setChip('bl-quote-color','#9b4f72',this)">סגול</button>
+        <label class="color-chip" style="background:#eee;color:#333">בחר <input type="color" style="opacity:0;position:absolute;width:0" onchange="setChip('bl-quote-color',this.value,this.parentElement)"></label>
+      </div>
+      <input type="hidden" id="bl-quote-color" value="#3a8c5c"></div>`
+  }
+};
+
+function openBlockModal(type) {
+  currentBlockType = type;
+  var cfg = blockConfigs[type];
+  document.getElementById('block-modal-title').textContent = cfg.title;
+  document.getElementById('block-modal-header').style.borderBottomColor = cfg.color;
+  document.getElementById('block-insert-btn').style.background = cfg.color;
+  document.getElementById('block-modal-body').innerHTML = cfg.fields;
+  document.getElementById('block-modal').style.display = 'flex';
+  // mark first chip as active
+  setTimeout(function(){
+    var chips = document.querySelectorAll('#block-modal .color-chip');
+    if(chips[0]) chips[0].classList.add('active');
+  },50);
+}
+function closeBlockModal() {
+  document.getElementById('block-modal').style.display = 'none';
+  currentBlockType = '';
+}
+document.getElementById('block-modal').addEventListener('click', function(e){ if(e.target===this) closeBlockModal(); });
+
+function setChip(hiddenId, val, el) {
+  document.getElementById(hiddenId).value = val;
+  el.closest('div').querySelectorAll('.color-chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function hexToRgba(hex, alpha) {
+  var r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+alpha+')';
+}
+
+function updateCtaPlaceholder() {
+  var type = document.getElementById('bl-cta-type').value;
+  var urlInput = document.getElementById('bl-cta-url');
+  var wrap = document.getElementById('bl-cta-url-wrap');
+  var lbl = document.getElementById('bl-cta-url-label');
+  var waMsgWrap = document.getElementById('bl-cta-wa-msg-wrap');
+  waMsgWrap.style.display = 'none';
+  if (type === 'none') { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  if (type === 'whatsapp') {
+    lbl.textContent = 'מספר וואטסאפ';
+    urlInput.placeholder = '972501234567';
+    waMsgWrap.style.display = '';
+  } else if (type === 'tel') { lbl.textContent = 'מספר טלפון'; urlInput.placeholder = '0501234567'; }
+  else if (type === 'mailto') { lbl.textContent = 'כתובת אימייל'; urlInput.placeholder = 'info@example.com'; }
+  else { lbl.textContent = 'כתובת URL'; urlInput.placeholder = 'https://'; }
+}
+
+function buildCtaHref() {
+  var type = document.getElementById('bl-cta-type').value;
+  var val  = (document.getElementById('bl-cta-url').value || '').trim();
+  if (type === 'none' || !val) return '';
+  if (type === 'whatsapp') {
+    var msg = (document.getElementById('bl-cta-wa-msg').value || '').trim();
+    var url = 'https://wa.me/' + val.replace(/\D/g,'');
+    if (msg) url += '?text=' + encodeURIComponent(msg);
+    return url;
+  }
+  if (type === 'tel')    return 'tel:' + val.replace(/\s/g,'');
+  if (type === 'mailto') return 'mailto:' + val;
+  return val.match(/^https?:\/\//) ? val : 'https://' + val;
+}
+
+function insertBlock() {
+  var html = '';
+  var type = currentBlockType;
+
+  if (type === 'cta') {
+    var text  = document.getElementById('bl-cta-text').value.trim() || 'לחצי כאן';
+    var color = document.getElementById('bl-cta-color').value;
+    var align = document.getElementById('bl-cta-align').value;
+    var href  = buildCtaHref();
+    var btnStyle = 'background:'+color+';color:white;padding:15px 36px;border:none;font-family:inherit;font-size:1rem;font-weight:800;cursor:pointer;border-radius:50px;box-shadow:0 8px 24px '+hexToRgba(color,'0.35')+';letter-spacing:-0.2px;text-decoration:none;display:inline-block';
+    var btn = href
+      ? '<a href="'+href+'" target="_blank" rel="noopener" style="'+btnStyle+'" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">'+text+'</a>'
+      : '<button style="'+btnStyle+'" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">'+text+'</button>';
+    html = '<div style="text-align:'+align+';margin:2rem 0">'+btn+'</div>';
+
+  } else if (type === 'tip') {
+    var title = document.getElementById('bl-tip-title').value.trim() || '💡 טיפ';
+    var text  = document.getElementById('bl-tip-text').value.trim() || '';
+    var color = document.getElementById('bl-tip-color').value;
+    html = '<div style="background:'+hexToRgba(color,'0.08')+';border:2px solid '+hexToRgba(color,'0.4')+';border-radius:12px;padding:1.2rem 1.4rem;margin:1.5rem 0;direction:rtl">'+
+      '<div style="font-size:0.72rem;font-weight:800;color:'+color+';letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem">'+title+'</div>'+
+      '<p style="margin:0;font-size:1rem;font-weight:600;color:#1a1a1a;line-height:1.6">'+text+'</p></div>';
+
+  } else if (type === 'steps') {
+    var color = document.getElementById('bl-steps-color').value;
+    var lines = document.getElementById('bl-steps-text').value.split('\n').filter(function(l){ return l.trim(); });
+    var items = lines.map(function(l, i){
+      return '<div style="display:flex;align-items:center;gap:12px;padding:0.6rem 0;border-bottom:1px solid #f0f0f0">'+
+        '<div style="width:30px;height:30px;background:'+color+';color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.85rem;flex-shrink:0">'+(i+1)+'</div>'+
+        '<span style="font-weight:600;font-size:0.95rem">'+l.trim()+'</span></div>';
+    }).join('');
+    html = '<div style="background:#f7f5f0;border-radius:12px;padding:1.2rem 1.4rem;margin:1.5rem 0">'+
+      '<div style="font-size:0.7rem;font-weight:800;color:'+color+';letter-spacing:2px;text-transform:uppercase;margin-bottom:0.8rem">השלבים</div>'+items+'</div>';
+
+  } else if (type === 'quote') {
+    var text   = document.getElementById('bl-quote-text').value.trim() || '';
+    var author = document.getElementById('bl-quote-author').value.trim();
+    var stars  = document.getElementById('bl-quote-stars').value;
+    var color  = document.getElementById('bl-quote-color').value;
+    html = '<div style="border-right:4px solid '+color+';background:'+hexToRgba(color,'0.05')+';border-radius:0 12px 12px 0;padding:1.2rem 1.4rem;margin:1.5rem 0;direction:rtl">'+
+      (stars ? '<div style="font-size:1rem;margin-bottom:0.4rem">'+stars+'</div>' : '')+
+      '<p style="font-size:1.05rem;font-weight:600;color:#1a1a1a;line-height:1.6;margin:0 0 0.5rem;font-style:italic">"'+text+'"</p>'+
+      (author ? '<div style="font-size:0.8rem;font-weight:700;color:'+color+'">— '+author+'</div>' : '')+
+      '</div>';
+  }
+
+  if (!html) return;
+  insertAtCursor(html + '<p></p>');
+  closeBlockModal();
+  showToast('✅ הבלוק הוכנס!');
+}
+function openFormEmbed() {
+  renderFormList();
+  document.getElementById('form-modal').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('form-code-input').focus(); }, 50);
+}
+function renderFormList() {
+  var forms = editor.querySelectorAll('.embedded-form-block');
+  var section = document.getElementById('form-existing-section');
+  var list = document.getElementById('form-existing-list');
+  if (forms.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = Array.from(forms).map(function(f, i) {
+    // נסה לחלץ תיאור — src של iframe או תחילת הקוד
+    var iframe = f.querySelector('iframe');
+    var label = '';
+    if (iframe && iframe.src) label = iframe.src.replace(/^https?:\/\//, '').substring(0, 60);
+    else if (iframe && iframe.getAttribute('srcdoc')) label = 'טופס HTML מוטמע';
+    else label = 'טופס ' + (i + 1);
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#f7f5f0;border:1px solid #e0dbd3;border-radius:2px">' +
+      '<span style="font-size:0.82rem;color:#444;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px">📋 ' + label + '</span>' +
+      '<button onclick="removeFormByIndex(' + i + ')" style="flex-shrink:0;margin-right:8px;background:#fff0f0;border:1px solid #fcc;color:#c8352a;font-weight:700;font-size:0.8rem;cursor:pointer;padding:3px 10px;border-radius:2px;font-family:inherit">✕ הסר</button>' +
+      '</div>';
+  }).join('');
+}
+function removeFormByIndex(i) {
+  var forms = editor.querySelectorAll('.embedded-form-block');
+  if (forms[i]) { forms[i].remove(); syncToHtml(); }
+  renderFormList();
+  showToast('🗑️ הטופס הוסר');
+}
+function closeFormEmbed() {
+  document.getElementById('form-modal').style.display = 'none';
+  document.getElementById('form-code-input').value = '';
+}
+function insertFormEmbed() {
+  var code = document.getElementById('form-code-input').value.trim();
+  if (!code) { alert('נא להדביק קוד טופס'); return; }
+  var h = document.getElementById('form-height-input').value;
+  var heightStyle = h ? 'height:'+h+'px;min-height:'+h+'px' : 'min-height:400px';
+
+  // בניית ה-wrapper כ-DOM node — שומר את ה-class
+  var wrapper = document.createElement('div');
+  wrapper.className = 'embedded-form-block';
+  wrapper.style.cssText = 'margin:1.5rem 0;border-radius:4px;overflow:hidden';
+
+  var iframe = document.createElement('iframe');
+  iframe.srcdoc = code;
+  iframe.style.cssText = 'width:100%;border:none;'+heightStyle+';display:block';
+  iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-same-origin allow-popups');
+  iframe.setAttribute('scrolling', 'no');
+  wrapper.appendChild(iframe);
+
+  // הכנסה במיקום הסמן
+  editor.focus();
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  if (savedRange) {
+    sel.addRange(savedRange);
+  } else {
+    var r = document.createRange();
+    r.selectNodeContents(editor);
+    r.collapse(false);
+    sel.addRange(r);
+  }
+  var range = sel.getRangeAt(0);
+  range.deleteContents();
+  range.insertNode(wrapper);
+  // הוסף פסקה ריקה אחרי
+  var p = document.createElement('p');
+  p.innerHTML = '<br>';
+  wrapper.parentNode.insertBefore(p, wrapper.nextSibling);
+  // הזז סמן לאחרי
+  var newRange = document.createRange();
+  newRange.setStart(p, 0);
+  newRange.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(newRange);
+  savedRange = null;
+
+  syncToHtml();
+  closeFormEmbed();
+  showToast('✅ הטופס הוכנס');
+}
+document.getElementById('form-modal').addEventListener('click', function(e){ if(e.target===this) closeFormEmbed(); });
+
+// ── POPUP EMBED ──
+function showTriggerOptions(type) {
+  document.getElementById('popup-btn-section').style.display = type==='button' ? '' : 'none';
+}
+// ── העלאת קובץ HTML לפופאפ ──
+function loadHtmlFile(input) {
+  var file = input.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('popup-code-input').value = e.target.result;
+    showToast('✅ הקובץ נטען — לחצי "הכנס פופאפ"');
+  };
+  reader.readAsText(file, 'UTF-8');
+  input.value = '';
+}
+
+function openPopupEmbed() {
+  renderPopupList();
+  document.getElementById('popup-modal').style.display = 'flex';
+  showTriggerOptions('button');
+}
+function renderPopupList() {
+  var popups = editor.querySelectorAll('.embedded-popup-block');
+  var section = document.getElementById('popup-existing-section');
+  var list = document.getElementById('popup-existing-list');
+  if (popups.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = Array.from(popups).map(function(p, i) {
+    var triggerEl = p.querySelector('button[data-popup-trigger]');
+    var label = triggerEl ? triggerEl.getAttribute('data-popup-trigger') : 'פופאפ ' + (i+1);
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#f7f5f0;border:1px solid #e0dbd3;border-radius:2px">' +
+      '<span style="font-size:0.82rem;color:#444;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px">🪟 ' + label + '</span>' +
+      '<button onclick="removePopupByIndex(' + i + ')" style="flex-shrink:0;margin-right:8px;background:#fff0f0;border:1px solid #fcc;color:#c8352a;font-weight:700;font-size:0.8rem;cursor:pointer;padding:3px 10px;border-radius:2px;font-family:inherit">✕ הסר</button>' +
+      '</div>';
+  }).join('');
+}
+function removePopupByIndex(i) {
+  var popups = editor.querySelectorAll('.embedded-popup-block');
+  if (popups[i]) { popups[i].remove(); syncToHtml(); }
+  renderPopupList();
+  showToast('🗑️ הפופאפ הוסר');
+}
+
+// ── GOOGLE SHEETS CONFIG ──
+function openSheetsConfig() {
+  const url = localStorage.getItem('sheets-api-url') || '';
+  document.getElementById('sheets-url-input').value = url;
+  document.getElementById('sheets-modal').style.display = 'flex';
+}
+
+function closeSheetsConfig() {
+  document.getElementById('sheets-modal').style.display = 'none';
+}
+
+function saveSheetsConfig() {
+  const url = document.getElementById('sheets-url-input').value.trim();
+  if (!url) { alert('הדבק את ה-URL'); return; }
+  
+  // Test connection
+  testSheetsConnection(url);
+}
+
+function testSheetsConnection(url) {
+  fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: new URLSearchParams({ test: 'true' })
+  }).then(() => {
+    localStorage.setItem('sheets-api-url', url);
+    updateSheetsStatus(true);
+    showToast('✅ מחובר ל-Google Sheets!');
+    setTimeout(() => closeSheetsConfig(), 1000);
+  }).catch(() => {
+    showToast('⚠️ URL לא מגיב - בדוק את הקישור');
+  });
+}
+
+function updateSheetsStatus(connected) {
+  const indicator = document.getElementById('sheets-status-dot');
+  if (indicator) {
+    if (connected) {
+      indicator.style.background = '#2e7d52';
+      indicator.title = 'מחובר ל-Google Sheets';
+    } else {
+      indicator.style.background = '#c8352a';
+      indicator.title = 'לא מחובר';
+    }
+  }
+}
+
+// Check status on load
+(function() {
+  const url = localStorage.getItem('sheets-api-url');
+  const indicator = document.getElementById('sheets-status-dot');
+  if (indicator) {
+    if (url && url.length > 0) {
+      updateSheetsStatus(true);
+    } else {
+      updateSheetsStatus(false);
+    }
+  }
+})();
+
+function closePopupEmbed() {
+  document.getElementById('popup-modal').style.display = 'none';
+  document.getElementById('popup-code-input').value = '';
+  document.getElementById('popup-btn-text').value = '';
+}
+function insertPopupEmbed() {
+  var code    = document.getElementById('popup-code-input').value.trim();
+  var btnText = document.getElementById('popup-btn-text').value.trim() || 'השאירו פרטים';
+  var triggerEl = document.querySelector('input[name="popup-trigger"]:checked');
+  var trigger = triggerEl ? triggerEl.value : 'button';
+  var seconds = document.getElementById('popup-seconds').value || 5;
+  var scroll  = document.getElementById('popup-scroll').value || 50;
+  if (!code) { alert('נא להדביק קוד טופס'); return; }
+
+  var uid = 'pp_' + Date.now();
+
+  // wrapper עם class לזיהוי
+  var wrapper = document.createElement('div');
+  wrapper.className = 'embedded-popup-block';
+
+  // כפתור פתיחה (לטריגר button)
+  if (trigger === 'button') {
+    var btn = document.createElement('div');
+    btn.style.cssText = 'text-align:center;margin:1.5rem 0';
+    var b = document.createElement('button');
+    b.setAttribute('data-popup-trigger', btnText);
+    b.style.cssText = 'background:#c8352a;color:white;padding:12px 32px;border:none;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;border-radius:3px';
+    b.setAttribute('onclick', 'document.getElementById("'+uid+'").style.display="flex"');
+    b.textContent = btnText;
+    btn.appendChild(b);
+    wrapper.appendChild(btn);
+  }
+
+  // overlay פופאפ
+  var overlay = document.createElement('div');
+  overlay.id = uid;
+  overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center';
+  overlay.setAttribute('onclick', 'if(event.target===this)this.style.display="none"');
+
+  var box = document.createElement('div');
+  box.style.cssText = 'position:relative;width:min(600px,95vw);height:min(700px,90vh);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5)';
+
+  var closeBtn = document.createElement('button');
+  closeBtn.setAttribute('onclick', 'document.getElementById("'+uid+'").style.display="none"');
+  closeBtn.style.cssText = 'position:absolute;top:10px;left:10px;z-index:10;background:rgba(0,0,0,0.5);color:white;border:none;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center';
+  closeBtn.textContent = '✕';
+
+  var isFullHtml = code.toLowerCase().indexOf('<html') !== -1 || code.toLowerCase().indexOf('<!doctype') !== -1;
+  if (isFullHtml) {
+    var iframe = document.createElement('iframe');
+    iframe.srcdoc = code;
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;position:absolute;inset:0';
+    iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox');
+    box.appendChild(closeBtn);
+    box.appendChild(iframe);
+  } else {
+    box.innerHTML = code;
+    box.insertBefore(closeBtn, box.firstChild);
+  }
+
+  overlay.appendChild(box);
+  wrapper.appendChild(overlay);
+
+  // סקריפט טריגר
+  if (trigger !== 'button') {
+    var script = document.createElement('script');
+    if (trigger === 'seconds') {
+      script.textContent = 'setTimeout(function(){var el=document.getElementById("'+uid+'");if(el)el.style.display="flex";},'+( seconds*1000 )+');';
+    } else if (trigger === 'scroll') {
+      script.textContent = '(function(){var s=false;window.addEventListener("scroll",function(){if(s)return;var p=(window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;if(p>='+scroll+'){s=true;var el=document.getElementById("'+uid+'");if(el)el.style.display="flex";}});})();';
+    } else if (trigger === 'exit') {
+      script.textContent = '(function(){var s=false;document.addEventListener("mouseleave",function(e){if(s||e.clientY>10)return;s=true;var el=document.getElementById("'+uid+'");if(el)el.style.display="flex";});})();';
+    }
+    wrapper.appendChild(script);
+  }
+
+  // הכנסה במיקום הסמן
+  editor.focus();
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  if (savedRange) { sel.addRange(savedRange); }
+  else { var r = document.createRange(); r.selectNodeContents(editor); r.collapse(false); sel.addRange(r); }
+  var range = sel.getRangeAt(0);
+  range.deleteContents();
+  range.insertNode(wrapper);
+  var p = document.createElement('p'); p.innerHTML = '<br>';
+  wrapper.parentNode.insertBefore(p, wrapper.nextSibling);
+  var nr = document.createRange(); nr.setStart(p,0); nr.collapse(true);
+  sel.removeAllRanges(); sel.addRange(nr);
+  savedRange = null;
+
+  syncToHtml();
+  closePopupEmbed();
+  var labels = {seconds:'אחרי '+seconds+' שניות', scroll:'אחרי '+scroll+'% גלילה', exit:'Exit Intent', button:'לחיצה על כפתור'};
+  showToast('✅ פופאפ הוכנס — יקפוץ: ' + labels[trigger]);
+}
+document.getElementById('popup-modal').addEventListener('click', function(e){ if(e.target===this) closePopupEmbed(); });
+
+// ── TOAST ──
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+renderList();
+
+document.getElementById('sheets-modal').addEventListener('click', function(e){ 
+  if(e.target===this) closeSheetsConfig(); 
+});
+</script>
+
+<!-- MODAL: GOOGLE SHEETS CONFIG -->
+<div class="modal-overlay" id="sheets-modal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <strong>📊 Google Sheets URL</strong>
+      <button type="button" class="modal-close" onclick="closeSheetsConfig()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="modal-label">הדבק את ה-URL מ-Google Apps Script:</label>
+      <textarea class="modal-input" id="sheets-url-input" rows="4" placeholder="https://script.google.com/macros/d/AKfycbx.../usercalc" dir="ltr"></textarea>
+      <div class="modal-hint">את ה-URL אתה מקבל כשאתה Deploy את ה-Apps Script ב-Google</div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-modal dark" onclick="saveSheetsConfig()">💾 שמור ✓</button>
+      <button type="button" class="btn-modal cancel" onclick="closeSheetsConfig()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

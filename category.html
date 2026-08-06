@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ישראל מגזין | קטגוריה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .cat-header {
+    padding: 3rem 5vw 2rem;
+    border-bottom: 2px solid var(--ink);
+  }
+  .cat-back {
+    font-size: 0.82rem;
+    color: var(--mid);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 1rem;
+    transition: color 0.2s;
+  }
+  .cat-back:hover { color: var(--red); }
+  .cat-name {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: -2px;
+  }
+  .cat-count { font-size: 0.85rem; color: var(--mid); margin-top: 0.3rem; }
+
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (max-width: 900px) { .cat-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .cat-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo-link"><span class="logo-il">ישראל</span><span class="logo-mag">מגזין</span></a>
+  <ul class="nav-cats">
+    <li><a href="category.html?cat=נדל״ן">נדל"ן</a></li>
+    <li><a href="category.html?cat=קוסמטיקה">קוסמטיקה</a></li>
+    <li><a href="category.html?cat=בריאות">בריאות</a></li>
+    <li><a href="category.html?cat=לייף סטייל">לייף סטייל</a></li>
+    <li><a href="category.html?cat=שיווק">שיווק</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleDrawer()" aria-label="תפריט">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-title">קטגוריות</div>
+  <a href="category.html?cat=נדל״ן"><span class="cat-dot" style="background:#2d6a9f"></span>נדל"ן</a>
+  <a href="category.html?cat=קוסמטיקה"><span class="cat-dot" style="background:#9b4f72"></span>קוסמטיקה</a>
+  <a href="category.html?cat=בריאות"><span class="cat-dot" style="background:#3a8c5c"></span>בריאות</a>
+  <a href="category.html?cat=לייף סטייל"><span class="cat-dot" style="background:#c8702a"></span>לייף סטייל</a>
+  <a href="category.html?cat=שיווק"><span class="cat-dot" style="background:#c8352a"></span>שיווק</a>
+  <a href="index.html"><span class="cat-dot" style="background:#0f0f0f"></span>דף הבית</a>
+  <div class="drawer-admin"><a href="admin/index.html">ניהול ✎</a></div>
+</div>
+
+<div class="cat-header">
+  <a href="index.html" class="cat-back">→ חזרה לעמוד הבית</a>
+  <div class="cat-name" id="cat-name">טוען...</div>
+  <div class="cat-count" id="cat-count"></div>
+</div>
+
+<div class="cat-grid" id="cat-grid"></div>
+
+<footer>
+  <div class="logo-link"><span class="logo-il">ישראל</span><span class="logo-mag">מגזין</span></div>
+  <ul class="footer-links">
+    <li><a href="index.html">בית</a></li>
+
+  </ul>
+  <div class="footer-copy">© 2025 ישראל מגזין</div>
+</footer>
+
+<script src="js/articles.js"></script>
+<script>
+const CATEGORIES = ['נדל"ן', 'קוסמטיקה', 'בריאות', 'לייף סטייל', 'שיווק'];
+
+document.getElementById('nav-cats').innerHTML = CATEGORIES.map(c =>
+  `<li><a href="category.html?cat=${encodeURIComponent(c)}">${c}</a></li>`
+).join('');
+
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('cat') || '';
+  const all = getArticles();
+  const articles = all.filter(a => a.category === cat || a.category === cat.replace('"','״'));
+
+  document.title = `ישראל מגזין | ${cat}`;
+  document.getElementById('cat-name').textContent = cat;
+  document.getElementById('cat-count').textContent = `${articles.length} כתבות`;
+
+  if (articles.length === 0) {
+    document.getElementById('cat-grid').innerHTML = `
+      <div class="empty-state">
+        <p>אין עדיין כתבות בקטגוריה זו.</p>
+        <a href="admin/index.html">הוסף כתבה ראשונה ←</a>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('cat-grid').innerHTML = articles.map(a => `
+    <a href="article.html?id=${a.id}" class="card">
+      <div class="card-emoji">${a.emoji}</div>
+      <div class="card-cat" style="color:${getCategoryColor(a.category)}">${a.category}</div>
+      <h2 class="card-title">${a.title}</h2>
+      <p class="card-excerpt">${a.excerpt}</p>
+      <div class="card-meta"><span>${formatDate(a.date)}</span><span>${a.readTime} דקות קריאה</span></div>
+    </a>
+  `).join('');
+}
+init();
+</script>
+
+<script>
+function toggleDrawer() {
+  document.getElementById('drawer').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+</script>
+</body>
+</html>

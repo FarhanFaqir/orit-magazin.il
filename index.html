@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ישראל מגזין</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Hero */
+  .hero {
+    border-bottom: 1px solid var(--line);
+    padding: 3rem 5vw 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 3rem;
+    align-items: start;
+  }
+  .hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1rem;
+  }
+  .hero-label::before {
+    content: '';
+    display: block;
+    width: 24px; height: 2px;
+    background: var(--red);
+  }
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 1.2rem;
+  }
+  .hero-excerpt {
+    font-size: 1.1rem;
+    color: var(--mid);
+    font-weight: 300;
+    max-width: 540px;
+    margin-bottom: 1.8rem;
+    line-height: 1.7;
+  }
+  .hero-read {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .hero-read:hover { color: var(--red); border-color: var(--red); }
+
+  .hero-side { display: flex; flex-direction: column; }
+  .side-item {
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .side-item:first-child { border-top: 1px solid var(--line); }
+  .side-item:hover .side-title { color: var(--red); }
+  .side-cat { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .side-title { font-size: 0.95rem; font-weight: 700; line-height: 1.3; transition: color 0.2s; }
+  .side-meta { font-size: 0.72rem; color: var(--mid); margin-top: 0.3rem; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-side { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo-link"><span class="logo-il">ישראל</span><span class="logo-mag">מגזין</span></a>
+  <ul class="nav-cats">
+    <li><a href="category.html?cat=נדל״ן">נדל"ן</a></li>
+    <li><a href="category.html?cat=קוסמטיקה">קוסמטיקה</a></li>
+    <li><a href="category.html?cat=בריאות">בריאות</a></li>
+    <li><a href="category.html?cat=לייף סטייל">לייף סטייל</a></li>
+    <li><a href="category.html?cat=שיווק">שיווק</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleDrawer()" aria-label="תפריט">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-title">קטגוריות</div>
+  <a href="category.html?cat=נדל״ן"><span class="cat-dot" style="background:#2d6a9f"></span>נדל"ן</a>
+  <a href="category.html?cat=קוסמטיקה"><span class="cat-dot" style="background:#9b4f72"></span>קוסמטיקה</a>
+  <a href="category.html?cat=בריאות"><span class="cat-dot" style="background:#3a8c5c"></span>בריאות</a>
+  <a href="category.html?cat=לייף סטייל"><span class="cat-dot" style="background:#c8702a"></span>לייף סטייל</a>
+  <a href="category.html?cat=שיווק"><span class="cat-dot" style="background:#c8352a"></span>שיווק</a>
+  <a href="index.html"><span class="cat-dot" style="background:#0f0f0f"></span>דף הבית</a>
+  <div class="drawer-admin"><a href="admin/index.html">ניהול ✎</a></div>
+</div>
+
+<section class="hero" id="hero-section">
+  <div class="hero-main" id="hero-main">טוען...</div>
+  <div class="hero-side" id="hero-side"></div>
+</section>
+
+<div id="categories-output"></div>
+
+<section class="newsletter">
+  <h2>רוצה לקבל את הכתבות הכי טובות ל<span>אימייל</span>?</h2>
+  <p>כל שבוע — 3 כתבות שנבחרו במיוחד. בלי ספאם, בלי שטויות.</p>
+  <div class="nl-form">
+    <input type="email" id="email-input" placeholder="האימייל שלך" />
+    <button onclick="handleSubscribe()">הצטרף חינם</button>
+  </div>
+  <p class="nl-note">ביטול בכל עת.</p>
+</section>
+
+<footer>
+  <div class="logo-link"><span class="logo-il">ישראל</span><span class="logo-mag"> מגזין</span></div>
+  <ul class="footer-links">
+    <li><a href="category.html?cat=נדל״ן">נדל"ן</a></li>
+    <li><a href="category.html?cat=קוסמטיקה">קוסמטיקה</a></li>
+    <li><a href="category.html?cat=בריאות">בריאות</a></li>
+    <li><a href="category.html?cat=לייף סטייל">לייף סטייל</a></li>
+    <li><a href="category.html?cat=שיווק">שיווק</a></li>
+
+  </ul>
+  <div class="footer-copy">© 2025 ישראל מגזין</div>
+</footer>
+
+<div class="toast" id="toast">✅ נרשמת בהצלחה! נתראה בתיבה 📬</div>
+
+<script src="js/articles.js"></script>
+<script>
+const CATEGORIES = ['נדל"ן', 'קוסמטיקה', 'בריאות', 'לייף סטייל', 'שיווק'];
+
+function renderHero(articles) {
+  const featured = articles.filter(a => a.featured);
+  const hero = featured[0] || articles[0];
+  if (!hero) return;
+
+  document.getElementById('hero-main').innerHTML = `
+    <div class="hero-label">כתבה ראשית</div>
+    <h1 class="hero-title">${hero.title}</h1>
+    <p class="hero-excerpt">${hero.excerpt}</p>
+    <a href="article.html?id=${hero.id}" class="hero-read">לקריאת הכתבה המלאה ←</a>
+  `;
+
+  const side = featured.slice(1, 5);
+  document.getElementById('hero-side').innerHTML = side.map(a => `
+    <a href="article.html?id=${a.id}" class="side-item">
+      <div class="side-cat" style="color:${getCategoryColor(a.category)}">${a.category}</div>
+      <div class="side-title">${a.title}</div>
+      <div class="side-meta">${formatDate(a.date)} · ${a.readTime} דקות קריאה</div>
+    </a>
+  `).join('');
+}
+
+
+function renderCategories(articles) {
+  const out = document.getElementById('categories-output');
+  let html = '';
+
+  CATEGORIES.forEach(cat => {
+    const catArticles = articles.filter(a => a.category === cat || a.category === cat.replace('"', '״'));
+    if (catArticles.length === 0) return;
+
+    const catParam = encodeURIComponent(cat);
+    html += `
+      <div class="section-header">
+        <div class="section-title"><span></span>${cat}</div>
+        <a href="category.html?cat=${catParam}" class="section-all">כל הכתבות ←</a>
+      </div>
+      <div class="cards-grid">
+        ${catArticles.slice(0, 3).map(a => `
+          <a href="article.html?id=${a.id}" class="card">
+            <div class="card-emoji">${a.image ? `<img src="${a.image}" style="width:100%;height:100%;object-fit:cover">` : a.emoji}</div>
+            <div class="card-cat" style="color:${getCategoryColor(a.category)}">${a.category}</div>
+            <h2 class="card-title">${a.title}</h2>
+            <p class="card-excerpt">${a.excerpt}</p>
+            <div class="card-meta"><span>${formatDate(a.date)}</span><span>${a.readTime} דקות קריאה</span></div>
+          </a>
+        `).join('')}
+      </div>
+    `;
+  });
+
+  out.innerHTML = html;
+}
+
+function init() {
+  const articles = getArticles();
+  renderHero(articles);
+  renderCategories(articles);
+}
+
+function handleSubscribe() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email || !email.includes('@')) { alert('נא להזין כתובת אימייל תקינה'); return; }
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+  document.getElementById('email-input').value = '';
+}
+
+init();
+</script>
+
+<script>
+function toggleDrawer() {
+  document.getElementById('drawer').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+</script>
+<!-- Code Injector for GTM, FB Pixel, etc -->
+<script src="js/code-injector.js"></script>
+</body>
+</html>

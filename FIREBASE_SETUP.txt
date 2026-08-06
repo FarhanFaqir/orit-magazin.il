@@ -1,0 +1,92 @@
+═════════════════════════════════════════════════════════════════
+🔧 Firebase Setup - Step by Step Guide
+═════════════════════════════════════════════════════════════════
+
+What this replaces
+────────────────────
+Right now the site saves everything in the browser's localStorage
+(articles, tracking codes, the Sheets webhook URL). That means an
+edit made on one computer never shows up for other visitors.
+Firebase turns this into a real, shared database — every visitor
+sees the same content, from any device.
+
+What will be stored in Firebase (4 parts)
+────────────────────────────────────────────
+1. Articles (replaces localStorage key "pulsar_articles")
+2. Newsletter signups (the "want the best articles by email?" form
+   — right now it doesn't actually save anything!)
+3. Form/lead submissions from inside articles (forms with
+   class="sheets-form")
+4. Tracking codes & settings (GTM, FB Pixel, GA4, Hotjar, etc.)
+
+Step 1: Create a Firebase project
+────────────────────────────────────
+1. Go to https://console.firebase.google.com/
+2. Click "Add project" → give it a name, e.g. "israel-magazine"
+3. You can turn off Google Analytics at this step (not needed)
+4. Click "Create project"
+
+Step 2: Add a Web app
+─────────────────────────
+1. On the project page → click the Web icon ( </> )
+2. Give the app a nickname (e.g. "israel-magazine-web")
+3. You don't need Firebase Hosting at this step
+4. Click "Register app"
+5. Firebase will show you a config object that looks like this:
+
+   const firebaseConfig = {
+     apiKey: "AIzaSy...",
+     authDomain: "israel-magazine-xxxxx.firebaseapp.com",
+     projectId: "israel-magazine-xxxxx",
+     storageBucket: "israel-magazine-xxxxx.appspot.com",
+     messagingSenderId: "123456789",
+     appId: "1:123456789:web:abcdef123456"
+   };
+
+   *** Copy this whole object and send it to me — I'll plug it
+       into js/firebase-config.js in place of the placeholder
+       values that are there now. ***
+
+Step 3: Enable Realtime Database
+────────────────────────────────────
+1. In the left sidebar → Build → Realtime Database
+2. Click "Create Database"
+3. Choose a location (Belgium/europe-west1 is recommended —
+   closest region to Israel)
+4. Start in "Test mode" (open access) — we'll lock this down
+   later (see "Security" below — this is critical to do
+   *before* the site goes live)
+5. Once created, copy the URL shown at the top
+   (it looks like: https://israel-magazine-xxxxx-default-rtdb.
+   europe-west1.firebasedatabase.app)
+   *** Send me this URL too — it's the databaseURL in the config ***
+
+Step 4: Data structure that will be created automatically
+────────────────────────────────────────────────────────────
+/articles/{id}          → each article (same shape as localStorage had)
+/newsletter/{id}         → { email, timestamp }
+/leads/{id}              → { formName, name, phone, email, q1..q5, timestamp, articleId }
+/settings/codes          → { gtm, fb, ga, hj, tb, ob, custom }
+
+Step 5: Security (important — before the site goes live!)
+───────────────────────────────────────────────────────────
+"Test mode" lets anyone on the internet read AND write to the
+database — that's fine for testing, but dangerous for a live site
+(anyone could delete every article from their own browser).
+Before launch, we need to update the database Rules so that
+articles are readable by everyone, but writing (adding/editing
+articles) requires admin authentication. I'll set this up when we
+get to that step — just remind me.
+
+Step 6: Send me
+───────────────────
+1. The full firebaseConfig object (from Step 2)
+2. The databaseURL (from Step 3)
+
+Once I have those, I'll do the actual migration:
+  - js/articles.js            → reads/writes Firebase instead of localStorage
+  - index.html + article.html → newsletter form actually saves to Firebase
+  - js/forms-to-sheets.js     → lead submissions also/instead go to Firebase
+  - js/code-injector.js + admin/code-manager.html → tracking codes from Firebase
+
+═════════════════════════════════════════════════════════════════

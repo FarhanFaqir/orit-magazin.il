@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מנהל קודים - ישראל מגזין</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    direction: rtl;
+    padding: 20px;
+  }
+  
+  .container { max-width: 1000px; margin: 0 auto; }
+  
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    color: #c8352a;
+  }
+  
+  .info-box {
+    background: #e3f2fd;
+    border-right: 4px solid #2196F3;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 30px;
+    color: #0d47a1;
+  }
+  
+  .codes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+  
+  .code-section {
+    background: white;
+    padding: 25px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .code-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .code-section .subtitle {
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 15px;
+    display: block;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #666;
+  }
+  
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    resize: vertical;
+    min-height: 100px;
+    direction: ltr;
+    text-align: left;
+  }
+  
+  textarea:focus {
+    border-color: #c8352a;
+    outline: none;
+    box-shadow: 0 0 5px rgba(200, 53, 42, 0.2);
+  }
+  
+  .code-id {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 4px;
+  }
+  
+  .status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  
+  .status-active { background: #4caf50; }
+  .status-empty { background: #ddd; }
+  
+  .code-status {
+    font-size: 0.85rem;
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 3px;
+    background: #f5f5f5;
+  }
+  
+  button {
+    padding: 12px 20px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Heebo';
+    font-weight: 700;
+    transition: all 0.2s;
+    margin-right: 10px;
+  }
+  
+  button:hover {
+    background: #c8352a;
+  }
+  
+  button.delete {
+    background: #f44336;
+    margin-top: 10px;
+    width: 100%;
+  }
+  
+  button.delete:hover {
+    background: #d32f2f;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .button-group button {
+    flex: 1;
+    margin-right: 0;
+  }
+  
+  .message {
+    padding: 12px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+    display: none;
+  }
+  
+  .message.success {
+    background: #c8e6c9;
+    color: #1b5e20;
+    display: block;
+  }
+  
+  .message.error {
+    background: #ffcdd2;
+    color: #b71c1c;
+    display: block;
+  }
+  
+  .all-codes-status {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+  }
+  
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .status-row:last-child {
+    border-bottom: none;
+  }
+  
+  .status-label {
+    font-size: 0.9rem;
+  }
+  
+  .test-link {
+    background: #2196F3;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 3px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    display: inline-block;
+    margin-top: 20px;
+  }
+  
+  .test-link:hover {
+    background: #1976D2;
+  }
+  
+  @media (max-width: 900px) {
+    .codes-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📊 מנהל קודים ו-Scripts</h1>
+  
+  <div class="info-box">
+    ✨ הוסף Google Tag Manager, Facebook Pixel, וקודים נוספים ישירות בלי צורך להעלות קבצים. השינויים מתעדכנים בזמן אמת.
+  </div>
+  
+  <!-- STATUS OVERVIEW -->
+  <div class="all-codes-status">
+    <h2>סטטוס קודים</h2>
+    <div id="statusOverview"></div>
+  </div>
+  
+  <!-- CODES GRID -->
+  <div class="codes-grid">
+    
+    <!-- GOOGLE TAG MANAGER -->
+    <div class="code-section">
+      <h2>🏷️ Google Tag Manager</h2>
+      <span class="subtitle">עקוב אחרי פעולות משתמשים</span>
+      
+      <div id="gtmMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>Google Tag Manager ID</label>
+        <textarea id="gtmCode" placeholder="GTM-XXXXXXX"></textarea>
+        <div class="code-id">דוגמה: GTM-XXXXXXXXX</div>
+      </div>
+      
+      <div class="code-status" id="gtmStatus"></div>
+      
+      <div class="button-group">
+        <button onclick="saveCode('gtm')">💾 שמור GTM</button>
+        <button class="delete" onclick="deleteCode('gtm')">🗑️ מחק</button>
+      </div>
+    </div>
+    
+    <!-- FACEBOOK PIXEL -->
+    <div class="code-section">
+      <h2>f Facebook Pixel</h2>
+      <span class="subtitle">עקוב אחרי המרות בפייסבוק</span>
+      
+      <div id="fbMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>Facebook Pixel ID</label>
+        <textarea id="fbCode" placeholder="123456789012345"></textarea>
+        <div class="code-id">דוגמה: 123456789012345</div>
+      </div>
+      
+      <div class="code-status" id="fbStatus"></div>
+      
+      <div class="button-group">
+        <button onclick="saveCode('fb')">💾 שמור FB</button>
+        <button class="delete" onclick="deleteCode('fb')">🗑️ מחק</button>
+      </div>
+    </div>
+    
+    <!-- GOOGLE ANALYTICS -->
+    <div class="code-section">
+      <h2>📈 Google Analytics 4</h2>
+      <span class="subtitle">ניתוח תנועה באתר</span>
+      
+      <div id="gaMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>Google Analytics Measurement ID</label>
+        <textarea id="gaCode" placeholder="G-XXXXXXXXXX"></textarea>
+        <div class="code-id">דוגמה: G-XXXXXXXXXX</div>
+      </div>
+      
+      <div class="code-status" id="gaStatus"></div>
+      
+      <div class="button-group">
+        <button onclick="saveCode('ga')">💾 שמור GA</button>
+        <button class="delete" onclick="deleteCode('ga')">🗑️ מחק</button>
+      </div>
+    </div>
+    
+    <!-- HOTJAR -->
+    <div class="code-section">
+      <h2>🔥 Hotjar</h2>
+      <span class="subtitle">ראה איך משתמשים גולשים באתר</span>
+      
+      <div id="hjMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>Hotjar Site ID</label>
+        <textarea id="hjCode" placeholder="123456"></textarea>
+        <div class="code-id">דוגמה: 123456</div>
+      </div>
+      
+      <div class="code-status" id="hjStatus"></div>
+      
+      <div class="button-group">
+        <button onclick="saveCode('hj')">💾 שמור HJ</button>
+        <button class="delete" onclick="deleteCode('hj')">🗑️ מחק</button>
+      </div>
+    </div>
+    
+    <!-- TABOOLA -->
+    <div class="code-section">
+      <h2>📰 Taboola</h2>
+      <span class="subtitle">הוסף מוצעות תוכן מתוקף</span>
+      
+      <div id="tbMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>Taboola Code (JavaScript)</label>
+        <textarea id="tbCode" placeholder="<script type='text/javascript' src='...'></script>"></textarea>
+        <div class="code-id">הדבק את הקוד המלא מTaboola</div>
+      </div>
+      
+      <div class="code-status" id="tbStatus"></div>
+      
+      <div class="button-group">
+        <button onclick="saveCode('tb')">💾 שמור TB</button>
+        <button class="delete" onclick="deleteCode('tb')">🗑️ מחק</button>
+      </div>
+    </div>
+    
+    <!-- OUTBRAIN -->
+    <div class="code-section">
+      <h2>🔗 Outbrain</h2>
+      <span class="subtitle">מונטיזציה דרך מוצעות תוכן</span>
+      
+      <div id="obMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>Outbrain Code (JavaScript)</label>
+        <textarea id="obCode" placeholder="<script type='text/javascript' src='...'></script>"></textarea>
+        <div class="code-id">הדבק את הקוד המלא מOutbrain</div>
+      </div>
+      
+      <div class="code-status" id="obStatus"></div>
+      
+      <div class="button-group">
+        <button onclick="saveCode('ob')">💾 שמור OB</button>
+        <button class="delete" onclick="deleteCode('ob')">🗑️ מחק</button>
+      </div>
+    </div>
+    
+    <!-- CUSTOM CODE -->
+    <div class="code-section">
+      <h2>⚙️ קוד מותאם</h2>
+      <span class="subtitle">קוד JavaScript/HTML כלשהו</span>
+      
+      <div id="customMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>קוד מותאם</label>
+        <textarea id="customCode" placeholder="<script>...</script>"></textarea>
+        <div class="code-id">הוסף כל קוד שרוצה (CSS, JS, HTML)</div>
+      </div>
+      
+      <div class="code-status" id="customStatus"></div>
+      
+      <div class="button-group">
+        <button onclick="saveCode('custom')">💾 שמור קוד</button>
+        <button class="delete" onclick="deleteCode('custom')">🗑️ מחק</button>
+      </div>
+    </div>
+  </div>
+  
+  <a href="/" class="test-link">👈 חזור לעמוד הבית</a>
+</div>
+
+<script>
+// Codes configuration
+const CODES = {
+  gtm: { name: 'Google Tag Manager', type: 'gtm-id' },
+  fb: { name: 'Facebook Pixel', type: 'fb-id' },
+  ga: { name: 'Google Analytics 4', type: 'ga-id' },
+  hj: { name: 'Hotjar', type: 'hj-id' },
+  tb: { name: 'Taboola', type: 'custom-js' },
+  ob: { name: 'Outbrain', type: 'custom-js' },
+  custom: { name: 'Custom Code', type: 'custom-js' }
+};
+
+// ── LOAD ON PAGE LOAD ──
+function loadAllCodes() {
+  Object.keys(CODES).forEach(key => {
+    const stored = localStorage.getItem(`code_${key}`);
+    if (stored) {
+      document.getElementById(`${key}Code`).value = stored;
+      updateStatus(key);
+    }
+  });
+  updateStatusOverview();
+}
+
+// ── SAVE CODE ──
+function saveCode(key) {
+  const code = document.getElementById(`${key}Code`).value.trim();
+  
+  if (!code) {
+    showMessage(`${key}Message`, 'נא להדביק קוד', 'error');
+    return;
+  }
+  
+  localStorage.setItem(`code_${key}`, code);
+  showMessage(`${key}Message`, '✅ קוד נשמר בהצלחה!', 'success');
+  updateStatus(key);
+  updateStatusOverview();
+  
+  // Auto-inject if GTM/GA/FB
+  injectCodes();
+}
+
+// ── DELETE CODE ──
+function deleteCode(key) {
+  if (confirm(`בטוח שברצונך למחוק ${CODES[key].name}?`)) {
+    localStorage.removeItem(`code_${key}`);
+    document.getElementById(`${key}Code`).value = '';
+    showMessage(`${key}Message`, '🗑️ קוד נמחק', 'success');
+    updateStatus(key);
+    updateStatusOverview();
+    injectCodes();
+  }
+}
+
+// ── UPDATE STATUS ──
+function updateStatus(key) {
+  const code = localStorage.getItem(`code_${key}`);
+  const statusEl = document.getElementById(`${key}Status`);
+  
+  if (code) {
+    statusEl.innerHTML = `<span class="status-indicator status-active"></span><strong>פעיל</strong> - קוד מוגדר`;
+  } else {
+    statusEl.innerHTML = `<span class="status-indicator status-empty"></span><strong>ריק</strong> - לא הוגדר קוד`;
+  }
+}
+
+// ── UPDATE STATUS OVERVIEW ──
+function updateStatusOverview() {
+  const overview = document.getElementById('statusOverview');
+  let html = '';
+  
+  Object.keys(CODES).forEach(key => {
+    const code = localStorage.getItem(`code_${key}`);
+    const status = code ? '✅ פעיל' : '❌ ריק';
+    html += `<div class="status-row">
+      <span class="status-label">${CODES[key].name}</span>
+      <span>${status}</span>
+    </div>`;
+  });
+  
+  overview.innerHTML = html;
+}
+
+// ── SHOW MESSAGE ──
+function showMessage(elementId, text, type) {
+  const el = document.getElementById(elementId);
+  el.textContent = text;
+  el.className = `message ${type}`;
+  
+  setTimeout(() => {
+    el.className = 'message';
+  }, 3000);
+}
+
+// ── INJECT CODES TO PAGES ──
+function injectCodes() {
+  // This function will be called by the main site to inject codes
+  console.log('Codes updated. Refresh the page to see changes.');
+}
+
+// ── INITIALIZE ──
+loadAllCodes();
+</script>
+
+</body>
+</html>

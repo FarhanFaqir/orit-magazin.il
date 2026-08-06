@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חיבור Google Sheets - ישראל מגזין</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    padding: 20px;
+    direction: rtl;
+  }
+  
+  .container { max-width: 900px; margin: 0 auto; }
+  
+  h1 { 
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: #0f0f0f;
+  }
+  
+  .subtitle {
+    color: #666;
+    margin-bottom: 30px;
+  }
+  
+  .card {
+    background: white;
+    padding: 25px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+  }
+  
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+  
+  .status-bar.connected {
+    background: #c8e6c9;
+    color: #1b5e20;
+  }
+  
+  .status-bar.disconnected {
+    background: #ffcdd2;
+    color: #b71c1c;
+  }
+  
+  .status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  
+  .status-bar.connected .status-indicator {
+    background: #4caf50;
+    box-shadow: 0 0 8px #4caf50;
+  }
+  
+  .status-bar.disconnected .status-indicator {
+    background: #f44336;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  
+  input[type="text"],
+  input[type="url"],
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-family: 'Heebo';
+    font-size: 0.95rem;
+    direction: ltr;
+    text-align: left;
+  }
+  
+  input:focus,
+  textarea:focus {
+    border-color: #0f0f0f;
+    outline: none;
+    box-shadow: 0 0 5px rgba(15, 15, 15, 0.2);
+  }
+  
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+  
+  .hint {
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 6px;
+  }
+  
+  button {
+    padding: 12px 24px;
+    background: #0f0f0f;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Heebo';
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+  
+  button:hover {
+    background: #c8352a;
+  }
+  
+  button.test {
+    background: #2196F3;
+  }
+  
+  button.test:hover {
+    background: #1976D2;
+  }
+  
+  .buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .buttons button {
+    flex: 1;
+  }
+  
+  .message {
+    padding: 12px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+    display: none;
+  }
+  
+  .message.success {
+    background: #c8e6c9;
+    color: #1b5e20;
+    display: block;
+  }
+  
+  .message.error {
+    background: #ffcdd2;
+    color: #b71c1c;
+    display: block;
+  }
+  
+  .message.info {
+    background: #e3f2fd;
+    color: #0d47a1;
+    display: block;
+  }
+  
+  .section {
+    margin-bottom: 30px;
+  }
+  
+  .section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #0f0f0f;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f5f5f5;
+  }
+  
+  .code-block {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    direction: ltr;
+    text-align: left;
+    overflow-x: auto;
+    margin-bottom: 15px;
+  }
+  
+  .instructions {
+    background: #e3f2fd;
+    border-left: 4px solid #2196F3;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+  }
+  
+  .instructions h3 {
+    color: #0d47a1;
+    margin-bottom: 10px;
+  }
+  
+  .instructions ol {
+    margin-right: 20px;
+  }
+  
+  .instructions li {
+    margin-bottom: 8px;
+    color: #0d47a1;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📊 חיבור Google Sheets</h1>
+  <p class="subtitle">חבר טפסים באתר ישירות לגוגל שיטס</p>
+  
+  <!-- CONNECTION STATUS -->
+  <div class="card">
+    <div id="statusBar" class="status-bar disconnected">
+      <span class="status-indicator"></span>
+      <span id="statusText">מנותק - צריך להגדיר</span>
+    </div>
+  </div>
+  
+  <!-- SETUP SECTION -->
+  <div class="card">
+    <div class="section">
+      <h2>🔧 הגדרה</h2>
+      
+      <div class="instructions">
+        <h3>איך להגדיר Google Sheets:</h3>
+        <ol>
+          <li>כנס ל-<a href="https://forms.google.com" target="_blank" style="color: #2196F3;">Google Forms</a></li>
+          <li>צור טופס חדש או בחר קיים</li>
+          <li>לחץ על האיקון ⚙️ → Responses</li>
+          <li>בחר "Create spreadsheet"</li>
+          <li>Copy את הSpreadsheet ID מה-URL:<br>
+              <code>https://docs.google.com/spreadsheets/d/<strong>YOUR-SHEET-ID</strong>/edit</code></li>
+          <li>Paste אתו למטה</li>
+        </ol>
+      </div>
+      
+      <div id="setupMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>🔗 Google Sheets ID</label>
+        <input 
+          type="text" 
+          id="sheetsId" 
+          placeholder="1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
+        >
+        <div class="hint">מצא את ה-ID בURL של הגיליון שלך</div>
+      </div>
+      
+      <div class="form-group">
+        <label>📋 שם ה-Worksheet (Default: Sheet1)</label>
+        <input 
+          type="text" 
+          id="sheetName" 
+          placeholder="Sheet1"
+          value="Sheet1"
+        >
+        <div class="hint">שם הגיליון בתוך ה-Spreadsheet</div>
+      </div>
+      
+      <div class="buttons">
+        <button class="test" onclick="testConnection()">🧪 בדוק חיבור</button>
+        <button onclick="saveConfig()">💾 שמור הגדרות</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- FORM FIELDS SECTION -->
+  <div class="card">
+    <div class="section">
+      <h2>📝 שדות הטופס</h2>
+      
+      <div class="instructions">
+        <h3>הגדר את שדות הטופס שיישמרו:</h3>
+        <ol>
+          <li>כל שדה יהיה עמודה בגיליון</li>
+          <li>עמודה ראשונה תמיד תהיה "Timestamp"</li>
+          <li>הוסף שדות לפי הצורך</li>
+        </ol>
+      </div>
+      
+      <div id="fieldsMessage" class="message"></div>
+      
+      <div class="form-group">
+        <label>שדות הטופס (כל שדה בשורה חדשה)</label>
+        <textarea 
+          id="formFields" 
+          placeholder="Name&#10;Email&#10;Phone&#10;Message"
+        >Name
+Email
+Phone
+Message</textarea>
+        <div class="hint">כל שדה יתואם לעמודה בגיליון</div>
+      </div>
+      
+      <button onclick="saveFields()">💾 שמור שדות</button>
+    </div>
+  </div>
+  
+  <!-- USAGE SECTION -->
+  <div class="card">
+    <div class="section">
+      <h2>💡 איך להשתמש?</h2>
+      
+      <h3 style="margin-top: 15px;">בכל עמוד שרוצה טופס:</h3>
+      
+      <div class="code-block">&lt;form id="contact-form" class="sheets-form"&gt;
+  &lt;input type="text" name="Name" placeholder="שם" required&gt;
+  &lt;input type="email" name="Email" placeholder="אימייל" required&gt;
+  &lt;input type="tel" name="Phone" placeholder="טלפון"&gt;
+  &lt;textarea name="Message" placeholder="הודעה"&gt;&lt;/textarea&gt;
+  &lt;button type="submit"&gt;שלח&lt;/button&gt;
+&lt;/form&gt;
+&lt;script src="/js/sheets-form-handler.js"&gt;&lt;/script&gt;
+&lt;/form&gt;

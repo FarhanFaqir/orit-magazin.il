@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ישראל מגזין | כתבה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;900&family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .article-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 5vw 4rem;
+  }
+  .article-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--mid);
+    text-decoration: none;
+    margin-bottom: 2rem;
+    transition: color 0.2s;
+  }
+  .article-back:hover { color: var(--red); }
+
+  .article-cat {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .article-title {
+    font-family: 'Heebo', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 900;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+    margin-bottom: 1rem;
+    word-spacing: 0.05em;
+  }
+  .article-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--mid);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .article-excerpt {
+    font-size: 1.15rem;
+    color: var(--mid);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .article-emoji-banner {
+    font-size: 5rem;
+    text-align: center;
+    padding: 2rem;
+    background: var(--line);
+    margin-bottom: 2rem;
+  }
+  .article-body {
+    font-size: 1.25rem;
+    line-height: 1.85;
+    color: #1a1a1a;
+  }
+  .article-body h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 2rem 0 0.8rem;
+    color: var(--ink);
+  }
+  .article-body p { margin-bottom: 1.2rem; }
+  .article-body strong { font-weight: 700; }
+
+  .related-section {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 5vw 4rem;
+    border-top: 2px solid var(--ink);
+    padding-top: 2rem;
+  }
+  .related-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .related-card {
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--line);
+    padding: 1.2rem;
+    display: block;
+    transition: border-color 0.2s;
+  }
+  .related-card:hover { border-color: var(--red); }
+  .related-card:hover .card-title { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .related-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo-link"><span class="logo-il">ישראל</span><span class="logo-mag">מגזין</span></a>
+  <ul class="nav-cats">
+    <li><a href="category.html?cat=נדל״ן">נדל"ן</a></li>
+    <li><a href="category.html?cat=קוסמטיקה">קוסמטיקה</a></li>
+    <li><a href="category.html?cat=בריאות">בריאות</a></li>
+    <li><a href="category.html?cat=לייף סטייל">לייף סטייל</a></li>
+    <li><a href="category.html?cat=שיווק">שיווק</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleDrawer()" aria-label="תפריט">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-title">קטגוריות</div>
+  <a href="category.html?cat=נדל״ן"><span class="cat-dot" style="background:#2d6a9f"></span>נדל"ן</a>
+  <a href="category.html?cat=קוסמטיקה"><span class="cat-dot" style="background:#9b4f72"></span>קוסמטיקה</a>
+  <a href="category.html?cat=בריאות"><span class="cat-dot" style="background:#3a8c5c"></span>בריאות</a>
+  <a href="category.html?cat=לייף סטייל"><span class="cat-dot" style="background:#c8702a"></span>לייף סטייל</a>
+  <a href="category.html?cat=שיווק"><span class="cat-dot" style="background:#c8352a"></span>שיווק</a>
+  <a href="index.html"><span class="cat-dot" style="background:#0f0f0f"></span>דף הבית</a>
+  <div class="drawer-admin"><a href="admin/index.html">ניהול ✎</a></div>
+</div>
+
+<div id="article-output"></div>
+<div id="related-output"></div>
+
+<section class="newsletter">
+  <h2>אהבת? קבל עוד כתבות <span>שוות</span></h2>
+  <p>ניוזלטר שבועי — רק הכתבות הכי טובות.</p>
+  <div class="nl-form">
+    <input type="email" id="email-input" placeholder="האימייל שלך" />
+    <button onclick="handleSubscribe()">הצטרף</button>
+  </div>
+</section>
+
+<footer>
+  <div class="logo-link"><span class="logo-il">ישראל</span><span class="logo-mag">מגזין</span></div>
+  <ul class="footer-links">
+    <li><a href="index.html">בית</a></li>
+    <li><a href="category.html?cat=נדל״ן">נדל"ן</a></li>
+    <li><a href="category.html?cat=קוסמטיקה">קוסמטיקה</a></li>
+    <li><a href="category.html?cat=בריאות">בריאות</a></li>
+
+  </ul>
+  <div class="footer-copy">© 2025 ישראל מגזין</div>
+</footer>
+
+<div class="toast" id="toast">✅ נרשמת!</div>
+
+<script src="js/articles.js"></script>
+<script>
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  const article = id ? getArticleById(id) : null;
+
+  if (!article) {
+    document.getElementById('article-output').innerHTML = `
+      <div class="article-wrap">
+        <p style="color:var(--mid);text-align:center;padding:4rem 0">הכתבה לא נמצאה. <a href="index.html" style="color:var(--red)">חזרה לבית ←</a></p>
+      </div>`;
+    return;
+  }
+
+  document.title = `ישראל מגזין | ${article.title}`;
+
+  document.getElementById('article-output').innerHTML = `
+    <div class="article-wrap">
+      <a href="index.html" class="article-back">→ חזרה לעמוד הבית</a>
+      <div class="article-cat" style="color:${getCategoryColor(article.category)}">${article.category}</div>
+      <h1 class="article-title">${article.title}</h1>
+      <div class="article-meta">
+        <span>📅 ${formatDate(article.date)}</span>
+        <span>⏱ ${article.readTime} דקות קריאה</span>
+      </div>
+      ${article.image
+        ? `<img src="${article.image}" style="width:100%;max-height:420px;object-fit:cover;display:block;margin-bottom:2rem">`
+        : `<div class="article-emoji-banner">${article.emoji}</div>`}
+      <div class="article-body" id="article-body-content">${article.content}</div>
+    </div>
+  `;
+
+  // ── הרץ scripts שהוכנסו לתוך הכתבה (פופאפים, טריגרים) ──
+  const body = document.getElementById('article-body-content');
+  if (body) {
+    body.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach(a => newScript.setAttribute(a.name, a.value));
+      newScript.textContent = oldScript.textContent;
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+  }
+
+  // Related articles
+  const all = getArticles();
+  const related = all.filter(a => a.id !== article.id && a.category === article.category).slice(0, 4);
+  if (related.length > 0) {
+    document.getElementById('related-output').innerHTML = `
+      <div class="related-section">
+        <div class="related-title">כתבות נוספות בקטגוריה</div>
+        <div class="related-grid">
+          ${related.map(a => `
+            <a href="article.html?id=${a.id}" class="related-card">
+              <div style="font-size:2rem;margin-bottom:0.5rem">${a.emoji}</div>
+              <div class="card-cat" style="color:${getCategoryColor(a.category)};font-size:0.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.3rem">${a.category}</div>
+              <div class="card-title">${a.title}</div>
+              <div class="card-meta" style="margin-top:0.5rem"><span>${formatDate(a.date)}</span></div>
+            </a>
+          `).join('')}
+        </div>
+      </div>`;
+  }
+}
+
+function handleSubscribe() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email || !email.includes('@')) { alert('נא להזין כתובת אימייל תקינה'); return; }
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+  document.getElementById('email-input').value = '';
+}
+
+init();
+</script>
+
+<script>
+function toggleDrawer() {
+  document.getElementById('drawer').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+</script>
+<!-- Code Injector for GTM, FB Pixel, etc -->
+<script src="js/code-injector.js"></script>
+</body>
+</html>

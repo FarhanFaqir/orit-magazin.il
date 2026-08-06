@@ -1,0 +1,89 @@
+═════════════════════════════════════════════════════════════════
+🔧 הגדרת Google Sheets - מדריך שלב אחר שלב
+═════════════════════════════════════════════════════════════════
+
+שלב 1: צור Google Sheet
+────────────────────────
+1. כנס ל- https://sheets.google.com
+2. צור Sheet חדש
+3. קרא לו: "טופסים" או שם כלשהו
+
+שלב 2: כותרות בשורה הראשונה
+──────────────────────────────
+A1: Timestamp
+B1: שם הטופס
+C1: שם
+D1: טלפון
+E1: אימייל
+F1: q1
+G1: q2
+H1: q3
+I1: q4
+J1: q5
+
+שלב 3: צור Apps Script
+───────────────────────
+1. בSheet שלך → Tools → Script Editor
+2. מחק את הקוד שיש שם
+3. הדבק את הקוד הזה:
+
+═════════════════════════════════════════════════════════════════
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const data = e.parameter;
+  
+  sheet.appendRow([
+    data['Timestamp'] || '',
+    data['FormName'] || '',
+    data['Name'] || '',
+    data['Phone'] || '',
+    data['Email'] || '',
+    data['q1'] || '',
+    data['q2'] || '',
+    data['q3'] || '',
+    data['q4'] || '',
+    data['q5'] || ''
+  ]);
+  
+  return ContentService.createTextOutput('OK');
+}
+
+═════════════════════════════════════════════════════════════════
+
+שלב 4: Deploy
+─────────────
+1. בScript Editor → Deploy → Deploy as web app
+2. Execute as: Me (המשתמש שלך)
+3. Who has access: Anyone
+4. לחץ Deploy
+5. Copy את ה-URL שמופיע
+
+שלב 5: הדבק ב-Panel
+───────────────────
+1. בפנל הניהול → עורך הכתבה
+2. לחץ על כפתור "📊 Sheets" (יהיה עם נקודה אדומה)
+3. הדבק את ה-URL מGoogle
+4. לחץ "שמור"
+5. הנקודה תהפוך לירוקה ✅
+
+שלב 6: יצור טופס בכתבה
+───────────────────────
+<form class="sheets-form">
+  <input type="hidden" name="FormName" value="שם הטופס">
+  <input type="text" name="Name" placeholder="שם" required>
+  <input type="tel" name="Phone" placeholder="טלפון" required>
+  <input type="email" name="Email" placeholder="אימייל" required>
+  <input type="text" name="q1" placeholder="שאלה 1">
+  <input type="text" name="q2" placeholder="שאלה 2">
+  <input type="text" name="q3" placeholder="שאלה 3">
+  <input type="text" name="q4" placeholder="שאלה 4">
+  <input type="text" name="q5" placeholder="שאלה 5">
+  <button type="submit">שלח</button>
+</form>
+
+<script src="/js/forms-to-sheets.js"></script>
+
+═════════════════════════════════════════════════════════════════
+זהו! כל טופס שתוסיפי עם class="sheets-form" יישלח לGoogle Sheets ✅
+═════════════════════════════════════════════════════════════════

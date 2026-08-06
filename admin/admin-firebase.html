@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ישראל מגזין | פנל ניהול</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<!-- Ace Editor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.min.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    padding: 20px;
+  }
+  
+  .container { max-width: 1200px; margin: 0 auto; }
+  
+  h1 { margin-bottom: 30px; font-size: 2rem; }
+  
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+  }
+  
+  .tab-button {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    font-family: 'Heebo';
+  }
+  
+  .tab-button.active {
+    border-bottom-color: #c8352a;
+    color: #c8352a;
+  }
+  
+  .tab-content {
+    display: none;
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  /* ARTICLES TAB */
+  .articles-list {
+    display: grid;
+    gap: 15px;
+  }
+  
+  .article-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #c8352a;
+  }
+  
+  .article-item h3 {
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+  }
+  
+  .article-item p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  
+  .article-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  button {
+    padding: 8px 15px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Heebo';
+    transition: background 0.2s;
+  }
+  
+  button:hover {
+    background: #c8352a;
+  }
+  
+  button.delete {
+    background: #c8352a;
+  }
+  
+  button.delete:hover {
+    background: #a0291f;
+  }
+  
+  /* FORM */
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-family: 'Heebo';
+    font-size: 1rem;
+  }
+  
+  textarea {
+    min-height: 150px;
+    resize: vertical;
+  }
+  
+  .editor-container {
+    height: 400px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin-bottom: 15px;
+  }
+  
+  .editor-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  
+  .success {
+    background: #4caf50;
+    color: white;
+    padding: 10px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+  
+  .error {
+    background: #f44336;
+    color: white;
+    padding: 10px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+  
+  .two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  @media (max-width: 900px) {
+    .two-columns { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🌐 ישראל מגזין - פנל ניהול</h1>
+  
+  <div class="tabs">
+    <button class="tab-button active" onclick="switchTab('articles')">📰 כתבות</button>
+    <button class="tab-button" onclick="switchTab('code')">💻 עורך קוד</button>
+    <button class="tab-button" onclick="switchTab('settings')">⚙️ הגדרות</button>
+  </div>
+  
+  <!-- ARTICLES TAB -->
+  <div id="articles" class="tab-content active">
+    <h2>ניהול כתבות</h2>
+    
+    <div class="two-columns">
+      <div>
+        <h3>הוסף כתבה חדשה</h3>
+        <div id="article-message"></div>
+        
+        <div class="form-group">
+          <label>כותרת</label>
+          <input type="text" id="articleTitle" placeholder="כותרת הכתבה">
+        </div>
+        
+        <div class="form-group">
+          <label>קטגוריה</label>
+          <select id="articleCategory">
+            <option>נדל"ן</option>
+            <option>קוסמטיקה</option>
+            <option>בריאות</option>
+            <option>לייף סטייל</option>
+            <option>שיווק</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>אמוג'י</label>
+          <input type="text" id="articleEmoji" maxlength="2" placeholder="😊">
+        </div>
+        
+        <div class="form-group">
+          <label>תאריך</label>
+          <input type="date" id="articleDate">
+        </div>
+        
+        <div class="form-group">
+          <label>זמן קריאה (דקות)</label>
+          <input type="text" id="articleReadTime" placeholder="5">
+        </div>
+        
+        <div class="form-group">
+          <label>תקציר</label>
+          <textarea id="articleExcerpt" placeholder="תקציר קצר של הכתבה"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>תוכן (HTML)</label>
+          <textarea id="articleContent" placeholder="תוכן הכתבה בHTMlL"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="articleFeatured"> כתבה מודגשת (תופיע בעמוד הבית)
+          </label>
+        </div>
+        
+        <button onclick="saveArticle()" style="width: 100%; padding: 12px; font-size: 1rem;">שמור כתבה</button>
+      </div>
+      
+      <div>
+        <h3>כתבות קיימות</h3>
+        <div id="articles-list" class="articles-list"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- CODE EDITOR TAB -->
+  <div id="code" class="tab-content">
+    <h2>עורך קוד</h2>
+    <p>ערוך את קבצי HTML, CSS ו-JavaScript בלי צורך להעלות קבצים חדשים</p>
+    
+    <div id="code-message"></div>
+    
+    <div class="form-group">
+      <label>בחר קובץ לעריכה</label>
+      <select id="codeFileSelect" onchange="loadCodeFile(this.value)">
+        <option value="">בחר קובץ...</option>
+        <option value="index">index.html - עמוד הבית</option>
+        <option value="article">article.html - עמוד כתבה</option>
+        <option value="category">category.html - עמוד קטגוריה</option>
+        <option value="style">css/style.css - סגנון</option>
+        <option value="articles">js/articles.js - כתבות</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="editor-label">קוד</label>
+      <div id="editor" class="editor-container"></div>
+    </div>
+    
+    <button onclick="saveCode()" style="margin-bottom: 10px;">שמור שינויים בקוד</button>
+    <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">⚠️ שינויים ישמרו ב-Firebase ויעדכנו באתר אחרי refresh</p>
+  </div>
+  
+  <!-- SETTINGS TAB -->
+  <div id="settings" class="tab-content">
+    <h2>הגדרות אתר</h2>
+    
+    <div id="settings-message"></div>
+    
+    <div class="form-group">
+      <label>שם האתר</label>
+      <input type="text" id="siteName" placeholder="ישראל מגזין">
+    </div>
+    
+    <div class="form-group">
+      <label>תיאור</label>
+      <textarea id="siteDescription" placeholder="תיאור קצר של האתר"></textarea>
+    </div>
+    
+    <div class="form-group">
+      <label>לוגו</label>
+      <input type="text" id="siteLogo" placeholder="🌐">
+    </div>
+    
+    <button onclick="saveSettings()">שמור הגדרות</button>
+  </div>
+</div>
+
+<script src="../js/firebase-config.js"></script>
+<script>
+// ── SETUP ACE EDITOR ──
+let editor = ace.edit("editor");
+editor.setTheme("ace/theme/monokai");
+editor.session.setMode("ace/mode/html");
+editor.setFontSize(14);
+editor.setOption("useWorker", false);
+
+let currentFile = null;
+
+// ── SWITCH TABS ──
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+  
+  if (tabName === 'articles') loadArticles();
+}
+
+// ── LOAD ARTICLES ──
+function loadArticles() {
+  database.ref('articles').on('value', (snapshot) => {
+    const container = document.getElementById('articles-list');
+    container.innerHTML = '';
+    
+    if (snapshot.exists()) {
+      Object.values(snapshot.val()).forEach(article => {
+        const div = document.createElement('div');
+        div.className = 'article-item';
+        div.innerHTML = `
+          <h3>${article.title}</h3>
+          <p>${article.category} • ${article.date}</p>
+          <div class="article-actions">
+            <button onclick="deleteArticle('${article.id}')">מחק</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+  });
+}
+
+// ── SAVE ARTICLE ──
+function saveArticle() {
+  const title = document.getElementById('articleTitle').value;
+  const category = document.getElementById('articleCategory').value;
+  const emoji = document.getElementById('articleEmoji').value;
+  const date = document.getElementById('articleDate').value;
+  const readTime = document.getElementById('articleReadTime').value;
+  const excerpt = document.getElementById('articleExcerpt').value;
+  const content = document.getElementById('articleContent').value;
+  const featured = document.getElementById('articleFeatured').checked;
+  
+  if (!title || !category || !content) {
+    showMessage('article-message', 'נא למלא שדות חובה', 'error');
+    return;
+  }
+  
+  const article = {
+    id: String(Date.now()),
+    title, category, emoji, date, readTime, excerpt, content, featured
+  };
+  
+  database.ref(`articles/${article.id}`).set(article)
+    .then(() => {
+      showMessage('article-message', '✅ כתבה נשמרה בהצלחה', 'success');
+      document.querySelectorAll('#articleTitle, #articleCategory, #articleEmoji, #articleDate, #articleReadTime, #articleExcerpt, #articleContent').forEach(el => el.value = '');
+      document.getElementById('articleFeatured').checked = false;
+      loadArticles();
+    })
+    .catch(err => showMessage('article-message', 'שגיאה: ' + err.message, 'error'));
+}
+
+// ── DELETE ARTICLE ──
+function deleteArticle(id) {
+  if (confirm('בטוחה שברצונך למחוק את הכתבה?')) {
+    database.ref(`articles/${id}`).remove()
+      .then(() => loadArticles())
+      .catch(err => showMessage('article-message', 'שגיאה: ' + err.message, 'error'));
+  }
+}
+
+// ── LOAD CODE FILE ──
+function loadCodeFile(filename) {
+  if (!filename) return;
+  
+  currentFile = filename;
+  const modes = {
+    'index': 'html',
+    'article': 'html',
+    'category': 'html',
+    'style': 'css',
+    'articles': 'javascript'
+  };
+  
+  editor.session.setMode(`ace/mode/${modes[filename]}`);
+  
+  // Load from Firebase
+  database.ref(`code/${filename}`).once('value').then((snapshot) => {
+    if (snapshot.exists()) {
+      editor.setValue(snapshot.val());
+    } else {
+      editor.setValue('// קובץ חדש');
+    }
+  });
+}
+
+// ── SAVE CODE ──
+function saveCode() {
+  if (!currentFile) {
+    showMessage('code-message', 'בחר קובץ לעריכה', 'error');
+    return;
+  }
+  
+  const code = editor.getValue();
+  database.ref(`code/${currentFile}`).set(code)
+    .then(() => showMessage('code-message', '✅ קוד נשמר בהצלחה', 'success'))
+    .catch(err => showMessage('code-message', 'שגיאה: ' + err.message, 'error'));
+}
+
+// ── SAVE SETTINGS ──
+function saveSettings() {
+  const settings = {
+    siteName: document.getElementById('siteName').value,
+    siteDescription: document.getElementById('siteDescription').value,
+    siteLogo: document.getElementById('siteLogo').value
+  };
+  
+  database.ref('settings').set(settings)
+    .then(() => showMessage('settings-message', '✅ הגדרות נשמרו בהצלחה', 'success'))
+    .catch(err => showMessage('settings-message', 'שגיאה: ' + err.message, 'error'));
+}
+
+// ── SHOW MESSAGE ──
+function showMessage(elementId, message, type) {
+  const el = document.getElementById(elementId);
+  el.innerHTML = `<div class="${type}">${message}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 3000);
+}
+
+// ── SET TODAY'S DATE ──
+document.getElementById('articleDate').valueAsDate = new Date();
+
+console.log('✅ Admin Panel Loaded');
+</script>
+
+</body>
+</html>

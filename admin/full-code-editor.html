@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עורך קוד מלא - ישראל מגזין</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #1e1e1e;
+    color: #e0e0e0;
+    direction: rtl;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .container { height: 100vh; display: flex; flex-direction: column; }
+  
+  .header {
+    background: #0f0f0f;
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .header h1 { font-size: 1.2rem; color: #c8352a; }
+  
+  .file-selector {
+    flex: 1;
+  }
+  
+  .file-selector label {
+    font-size: 0.85rem;
+    color: #888;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  select {
+    padding: 8px 12px;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    color: #e0e0e0;
+    font-family: 'Heebo';
+    border-radius: 3px;
+    cursor: pointer;
+    min-width: 250px;
+  }
+  
+  select:focus {
+    border-color: #c8352a;
+    outline: none;
+  }
+  
+  .buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  button {
+    padding: 8px 16px;
+    background: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Heebo';
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  
+  button:hover {
+    background: #c8352a;
+    border-color: #c8352a;
+    color: white;
+  }
+  
+  button.download {
+    background: #2196F3;
+    border-color: #2196F3;
+  }
+  
+  button.download:hover {
+    background: #1976D2;
+    border-color: #1976D2;
+  }
+  
+  .editor-container {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  
+  #editor {
+    flex: 1;
+    font-size: 13px;
+  }
+  
+  .status-bar {
+    background: #0f0f0f;
+    border-top: 1px solid #333;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #888;
+  }
+  
+  .status-info {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .message {
+    padding: 10px 16px;
+    border-radius: 3px;
+    display: none;
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 1000;
+    font-size: 0.9rem;
+  }
+  
+  .message.success {
+    background: #4caf50;
+    color: white;
+    display: block;
+  }
+  
+  .message.error {
+    background: #f44336;
+    color: white;
+    display: block;
+  }
+  
+  .keyboard-shortcuts {
+    padding: 10px 20px;
+    font-size: 0.75rem;
+    color: #666;
+    border-top: 1px solid #333;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>💻 עורך קוד מלא</h1>
+    
+    <div class="file-selector">
+      <label>בחר קובץ לעריכה:</label>
+      <select id="fileSelector" onchange="loadFile(this.value)">
+        <option value="">-- בחר קובץ --</option>
+        
+        <!-- HTML FILES -->
+        <optgroup label="📄 קבצי HTML">
+          <option value="index">index.html - עמוד הבית</option>
+          <option value="article">article.html - עמוד כתבה</option>
+          <option value="category">category.html - עמוד קטגוריה</option>
+        </optgroup>
+        
+        <!-- CSS FILES -->
+        <optgroup label="🎨 קבצי סגנון">
+          <option value="style">css/style.css - סגנונות כללי</option>
+        </optgroup>
+        
+        <!-- JAVASCRIPT FILES -->
+        <optgroup label="⚙️ קבצי JavaScript">
+          <option value="articles">js/articles.js - ניהול כתבות</option>
+          <option value="codeInjector">js/code-injector.js - הזרקת קודים</option>
+          <option value="firebaseConfig">js/firebase-config.js - הגדרות Firebase</option>
+          <option value="articlesFirebase">js/articles-firebase.js - כתבות Firebase</option>
+        </optgroup>
+      </select>
+    </div>
+    
+    <div class="buttons">
+      <button id="saveBtn" onclick="saveFile()" style="display:none;">💾 שמור</button>
+      <button id="downloadBtn" class="download" onclick="downloadFile()" style="display:none;">⬇️ הורד</button>
+      <button onclick="location.href='/'">🏠 בית</button>
+    </div>
+  </div>
+  
+  <div id="message" class="message"></div>
+  
+  <div class="editor-container">
+    <div id="editor"></div>
+  </div>
+  
+  <div class="status-bar">
+    <div class="status-info">
+      <div>📄 קובץ: <span id="fileName">לא נבחר</span></div>
+      <div>📊 שורות: <span id="lineCount">0</span></div>
+      <div>⌨️ תווים: <span id="charCount">0</span></div>
+    </div>
+    <div>
+      Ctrl+S: שמור | Ctrl+Z: ביטול | Ctrl+Y: חזור
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ACE EDITOR SETUP ──
+const editor = ace.edit("editor");
+editor.setTheme("ace/theme/dracula");
+editor.session.setMode("ace/mode/html");
+editor.setFontSize(13);
+editor.setOption("useWorker", false);
+editor.setOption("showPrintMargin", false);
+
+// ── FILES DATABASE ──
+const FILES = {
+  index: {
+    name: 'index.html',
+    mode: 'html',
+    path: '/index.html',
+    type: 'html'
+  },
+  article: {
+    name: 'article.html',
+    mode: 'html',
+    path: '/article.html',
+    type: 'html'
+  },
+  category: {
+    name: 'category.html',
+    mode: 'html',
+    path: '/category.html',
+    type: 'html'
+  },
+  style: {
+    name: 'css/style.css',
+    mode: 'css',
+    path: '/css/style.css',
+    type: 'css'
+  },
+  articles: {
+    name: 'js/articles.js',
+    mode: 'javascript',
+    path: '/js/articles.js',
+    type: 'js'
+  },
+  codeInjector: {
+    name: 'js/code-injector.js',
+    mode: 'javascript',
+    path: '/js/code-injector.js',
+    type: 'js'
+  },
+  firebaseConfig: {
+    name: 'js/firebase-config.js',
+    mode: 'javascript',
+    path: '/js/firebase-config.js',
+    type: 'js'
+  },
+  articlesFirebase: {
+    name: 'js/articles-firebase.js',
+    mode: 'javascript',
+    path: '/js/articles-firebase.js',
+    type: 'js'
+  }
+};
+
+let currentFile = null;
+
+// ── LOAD FILE ──
+function loadFile(fileKey) {
+  if (!fileKey) {
+    editor.setValue('');
+    currentFile = null;
+    document.getElementById('saveBtn').style.display = 'none';
+    document.getElementById('downloadBtn').style.display = 'none';
+    document.getElementById('fileName').textContent = 'לא נבחר';
+    return;
+  }
+  
+  currentFile = FILES[fileKey];
+  
+  // Set editor mode
+  editor.session.setMode(`ace/mode/${currentFile.mode}`);
+  
+  // Fetch file
+  fetch(currentFile.path)
+    .then(r => r.text())
+    .then(content => {
+      editor.setValue(content);
+      editor.session.setUndoManager(new ace.UndoManager());
+      document.getElementById('saveBtn').style.display = 'inline-block';
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+      document.getElementById('fileName').textContent = currentFile.name;
+      updateStats();
+    })
+    .catch(err => {
+      showMessage(`שגיאה בטעינת קובץ: ${err.message}`, 'error');
+    });
+}
+
+// ── SAVE FILE ──
+function saveFile() {
+  if (!currentFile) {
+    showMessage('בחר קובץ קודם', 'error');
+    return;
+  }
+  
+  const content = editor.getValue();
+  
+  // Save to localStorage
+  localStorage.setItem(`code_file_${currentFile.path}`, content);
+  
+  // Inject if needed (for live update)
+  if (currentFile.type === 'js') {
+    try {
+      eval(content);
+    } catch (e) {
+      console.warn('JavaScript תיקייה לא תקנה:', e);
+    }
+  }
+  
+  showMessage(`✅ ${currentFile.name} נשמר בהצלחה!`, 'success');
+}
+
+// ── DOWNLOAD FILE ──
+function downloadFile() {
+  if (!currentFile) {
+    showMessage('בחר קובץ קודם', 'error');
+    return;
+  }
+  
+  const content = editor.getValue();
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = currentFile.name.split('/').pop();
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showMessage(`⬇️ ${currentFile.name} הורד`, 'success');
+}
+
+// ── UPDATE STATS ──
+function updateStats() {
+  const content = editor.getValue();
+  const lines = content.split('\n').length;
+  const chars = content.length;
+  
+  document.getElementById('lineCount').textContent = lines;
+  document.getElementById('charCount').textContent = chars.toLocaleString('he-IL');
+}
+
+// ── SHOW MESSAGE ──
+function showMessage(text, type) {
+  const el = document.getElementById('message');
+  el.textContent = text;
+  el.className = `message ${type}`;
+  
+  setTimeout(() => {
+    el.className = 'message';
+  }, 3000);
+}
+
+// ── KEYBOARD SHORTCUTS ──
+editor.commands.addCommand({
+  name: 'save',
+  bindKey: { win: 'Ctrl-S', mac: 'Cmd-S' },
+  exec: saveFile
+});
+
+// ── UPDATE STATS ON CHANGE ──
+editor.session.on('change', updateStats);
+
+console.log('✅ Code Editor Loaded');
+</script>
+
+</body>
+</html>

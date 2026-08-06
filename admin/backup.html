@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>גיבוי אתר - ישראל מגזין</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    padding: 20px;
+    direction: rtl;
+  }
+  
+  .container { max-width: 800px; margin: 0 auto; }
+  
+  h1 { font-size: 1.8rem; margin-bottom: 10px; color: #0f0f0f; }
+  .subtitle { color: #666; margin-bottom: 30px; }
+  
+  .card {
+    background: white;
+    padding: 25px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+  }
+  
+  .section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #0f0f0f;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f5f5f5;
+  }
+  
+  .info-box {
+    background: #e3f2fd;
+    border-left: 4px solid #2196F3;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    color: #0d47a1;
+  }
+  
+  .file-list {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .file-list div {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .file-list div:last-child {
+    border-bottom: none;
+  }
+  
+  button {
+    padding: 12px 24px;
+    background: #0f0f0f;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Heebo';
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+  
+  button:hover {
+    background: #c8352a;
+  }
+  
+  button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .buttons button {
+    flex: 1;
+  }
+  
+  .progress {
+    width: 100%;
+    height: 24px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    overflow: hidden;
+    display: none;
+    margin-bottom: 15px;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #2196F3, #4caf50);
+    width: 0%;
+    transition: width 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  
+  .message {
+    padding: 12px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+    display: none;
+  }
+  
+  .message.success {
+    background: #c8e6c9;
+    color: #1b5e20;
+    display: block;
+  }
+  
+  .message.error {
+    background: #ffcdd2;
+    color: #b71c1c;
+    display: block;
+  }
+  
+  .message.info {
+    background: #e3f2fd;
+    color: #0d47a1;
+    display: block;
+  }
+  
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .stat-box {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 3px;
+    text-align: center;
+  }
+  
+  .stat-box .number {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #2196F3;
+  }
+  
+  .stat-box .label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>💾 גיבוי אתר</h1>
+  <p class="subtitle">הורד את האתר כולו כ-ZIP לגיבוי</p>
+  
+  <div class="card">
+    <div class="section">
+      <h2>📥 הורד גיבוי מלא</h2>
+      
+      <div class="info-box">
+        ✨ הורדה מלאה של כל קבצי האתר. השתמש לגיבוי או לשמירה מקומית.
+      </div>
+      
+      <div id="message" class="message"></div>
+      
+      <div class="progress" id="progress">
+        <div class="progress-bar" id="progressBar">0%</div>
+      </div>
+      
+      <div class="stats">
+        <div class="stat-box">
+          <div class="number" id="fileCount">0</div>
+          <div class="label">קבצים</div>
+        </div>
+        <div class="stat-box">
+          <div class="number" id="sizeCount">0 KB</div>
+          <div class="label">גודל משוער</div>
+        </div>
+      </div>
+      
+      <h3 style="margin-bottom: 15px;">📋 קבצים שיורדו:</h3>
+      
+      <div class="file-list" id="fileList"></div>
+      
+      <button onclick="downloadBackup()" id="downloadBtn">⬇️ הורד גיבוי</button>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="section">
+      <h2>ℹ️ מידע</h2>
+      
+      <p style="line-height: 1.8; margin-bottom: 15px;">
+        הגיבוי יכלול:
+      </p>
+      
+      <ul style="margin-right: 20px; line-height: 1.8;">
+        <li>✅ כל קבצי HTML (index, article, category)</li>
+        <li>✅ כל קבצי CSS (סגנונות)</li>
+        <li>✅ כל קבצי JavaScript (articles, code-injector, firebase וכו')</li>
+        <li>✅ כל קבצי הניהול (admin panel)</li>
+      </ul>
+      
+      <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+        💡 היפך: גיבויים זה טוב לשמירת גרסאות קודמות של האתר.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Files to backup
+const FILES_TO_BACKUP = [
+  // HTML
+  '/',
+  '/article.html',
+  '/category.html',
+  
+  // CSS
+  '/css/style.css',
+  
+  // JavaScript
+  '/js/articles.js',
+  '/js/articles-firebase.js',
+  '/js/firebase-config.js',
+  '/js/code-injector.js',
+  
+  // Admin
+  '/admin/index.html',
+  '/admin/code-manager.html',
+  '/admin/style-editor.html',
+  '/admin/full-code-editor.html',
+  '/admin/sheets-connector.html',
+  '/admin/admin-firebase.html'
+];
+
+// Update file count
+document.getElementById('fileCount').textContent = FILES_TO_BACKUP.length;
+document.getElementById('sizeCount').textContent = (FILES_TO_BACKUP.length * 25) + ' KB';
+
+// Display file list
+const fileList = document.getElementById('fileList');
+FILES_TO_BACKUP.forEach(file => {
+  const div = document.createElement('div');
+  div.textContent = file === '/' ? 'index.html' : file;
+  fileList.appendChild(div);
+});
+
+// Download backup
+async function downloadBackup() {
+  const btn = document.getElementById('downloadBtn');
+  btn.disabled = true;
+  
+  const progress = document.getElementById('progress');
+  const progressBar = document.getElementById('progressBar');
+  progress.style.display = 'block';
+  
+  showMessage('מתחיל הורדה...', 'info');
+  
+  try {
+    const zip = new JSZip();
+    
+    for (let i = 0; i < FILES_TO_BACKUP.length; i++) {
+      const file = FILES_TO_BACKUP[i];
+      
+      try {
+        const response = await fetch(file);
+        if (response.ok) {
+          const content = await response.text();
+          const filename = file === '/' ? 'index.html' : file.substring(1);
+          zip.file(filename, content);
+        }
+      } catch (e) {
+        console.warn(`Could not fetch ${file}`, e);
+      }
+      
+      // Update progress
+      const percent = Math.round((i + 1) / FILES_TO_BACKUP.length * 100);
+      progressBar.style.width = percent + '%';
+      progressBar.textContent = percent + '%';
+    }
+    
+    // Generate ZIP
+    const blob = await zip.generateAsync({ type: 'blob' });
+    
+    // Download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `israel-magazine-backup-${new Date().toISOString().split('T')[0]}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showMessage('✅ גיבוי הורד בהצלחה!', 'success');
+  } catch (error) {
+    showMessage('❌ שגיאה בהורדה: ' + error.message, 'error');
+  }
+  
+  btn.disabled = false;
+  progress.style.display = 'none';
+}
+
+function showMessage(text, type) {
+  const el = document.getElementById('message');
+  el.textContent = text;
+  el.className = `message ${type}`;
+}
+</script>
+
+</body>
+</html>
