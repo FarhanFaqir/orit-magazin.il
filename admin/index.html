@@ -1452,7 +1452,7 @@ function insertPopupEmbed() {
   overlay.setAttribute('onclick', 'if(event.target===this)this.style.display="none"');
 
   var box = document.createElement('div');
-  box.style.cssText = 'position:relative;width:min(600px,95vw);height:min(700px,90vh);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5)';
+  box.style.cssText = 'position:relative;width:min(600px,95vw);height:min(700px,90vh);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);background:#fff';
 
   var closeBtn = document.createElement('button');
   closeBtn.setAttribute('onclick', 'document.getElementById("'+uid+'").style.display="none"');
