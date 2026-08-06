@@ -4,6 +4,9 @@
 // isn't available, so the site doesn't lose tracking if the DB is briefly down.
 
 function injectSavedCodes() {
+  // אל תפעיל פיקסלים/אנליטיקס אמיתיים בתוך ה-iframe של תצוגה מקדימה חיה
+  // בעורך — זו לא צפייה אמיתית של מבקר.
+  if (new URLSearchParams(location.search).get('preview') === '1') return;
   getStoredCodes().then(codes => {
     if (!codes) return;
     if (codes.gtm)    injectGTM(codes.gtm);
