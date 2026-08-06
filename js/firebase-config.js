@@ -1,14 +1,15 @@
 // ── FIREBASE CONFIGURATION ──
-// Replace with YOUR Firebase config from https://console.firebase.google.com/
+// Real project config (from console.firebase.google.com — israel-magazine project)
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyBKVNV73rzj9aPD_9_jE5gi63eIQY3WEAs",
   authDomain: "israel-magazine.firebaseapp.com",
   projectId: "israel-magazine",
-  storageBucket: "israel-magazine.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  databaseURL: "https://israel-magazine-default-rtdb.europe-west1.firebasedatabase.app",
-  appId: "YOUR_APP_ID"
+  storageBucket: "israel-magazine.firebasestorage.app",
+  messagingSenderId: "195276364802",
+  appId: "1:195276364802:web:c7c3113b4a09b4ee17db1b",
+  measurementId: "G-F5L8SJKDJT",
+  databaseURL: "https://israel-magazine-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
 // Initialize Firebase

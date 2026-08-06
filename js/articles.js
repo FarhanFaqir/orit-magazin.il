@@ -1,8 +1,11 @@
 // ── PULSAR ARTICLES STORE ──
-// All article data lives here. Admin panel writes to this store.
-// index.html and article.html read from it.
+// All article data lives in Firebase Realtime Database, under /articles.
+// Admin panel writes to this store. index.html, category.html and
+// article.html read from it. localStorage is only a fallback if Firebase
+// fails to load.
 
 const STORE_KEY = 'pulsar_articles';
+const ARTICLES_PATH = 'articles';
 
 const DEFAULT_ARTICLES = [
   {
@@ -320,43 +323,66 @@ const DEFAULT_ARTICLES = [
   }
 ];
 
-// ── API ──
-function getArticles() {
-  const stored = localStorage.getItem(STORE_KEY);
-  if (stored) {
-    try { return JSON.parse(stored); }
-    catch(e) { return DEFAULT_ARTICLES; }
-  }
-  // First load — seed with defaults
-  localStorage.setItem(STORE_KEY, JSON.stringify(DEFAULT_ARTICLES));
-  return DEFAULT_ARTICLES;
+// ── API (Firebase Realtime Database — falls back to localStorage if Firebase isn't loaded) ──
+// All functions return Promises now, since reads/writes go over the network.
+// Every page's init() must `await` these instead of calling them synchronously.
+
+function hasFirebase() {
+  return typeof database !== 'undefined' && database !== null;
 }
 
-function saveArticles(articles) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(articles));
+function getArticles() {
+  if (!hasFirebase()) {
+    // Fallback — keeps the site working even if Firebase fails to load
+    const stored = localStorage.getItem(STORE_KEY);
+    if (stored) { try { return Promise.resolve(JSON.parse(stored)); } catch(e) {} }
+    return Promise.resolve(DEFAULT_ARTICLES);
+  }
+  return database.ref(ARTICLES_PATH).once('value').then(snap => {
+    if (snap.exists()) {
+      const articles = Object.values(snap.val());
+      // Newest first (matches the old unshift() behavior) — Firebase orders
+      // integer-like keys numerically ascending, so we re-sort explicitly.
+      articles.sort((a, b) => Number(b.id) - Number(a.id));
+      return articles;
+    }
+    // First load ever — seed Firebase with the defaults
+    const seed = {};
+    DEFAULT_ARTICLES.forEach(a => seed[a.id] = a);
+    return database.ref(ARTICLES_PATH).set(seed).then(() => DEFAULT_ARTICLES.slice());
+  }).catch(err => {
+    console.error('❌ Firebase read failed, falling back to defaults:', err);
+    return DEFAULT_ARTICLES;
+  });
 }
 
 function getArticleById(id) {
-  return getArticles().find(a => a.id === String(id)) || null;
+  if (!hasFirebase()) {
+    return getArticles().then(articles => articles.find(a => a.id === String(id)) || null);
+  }
+  return database.ref(`${ARTICLES_PATH}/${id}`).once('value')
+    .then(snap => snap.val() || null)
+    .catch(err => { console.error('❌ Firebase read failed:', err); return null; });
 }
 
 function addArticle(article) {
-  const articles = getArticles();
   article.id = String(Date.now());
-  articles.unshift(article);
-  saveArticles(articles);
-  return article;
+  if (!hasFirebase()) return Promise.resolve(article);
+  return database.ref(`${ARTICLES_PATH}/${article.id}`).set(article)
+    .then(() => article)
+    .catch(err => { console.error('❌ Firebase write failed:', err); throw err; });
 }
 
 function deleteArticle(id) {
-  const articles = getArticles().filter(a => a.id !== String(id));
-  saveArticles(articles);
+  if (!hasFirebase()) return Promise.resolve();
+  return database.ref(`${ARTICLES_PATH}/${id}`).remove()
+    .catch(err => { console.error('❌ Firebase delete failed:', err); throw err; });
 }
 
 function updateArticle(id, updates) {
-  const articles = getArticles();
-  const idx = articles.findIndex(a => a.id === String(id));
-  if (idx !== -1) { articles[idx] = { ...articles[idx], ...updates }; saveArticles(articles); }
+  if (!hasFirebase()) return Promise.resolve();
+  return database.ref(`${ARTICLES_PATH}/${id}`).update(updates)
+    .catch(err => { console.error('❌ Firebase update failed:', err); throw err; });
 }
 
 function getCategorySlug(cat) {

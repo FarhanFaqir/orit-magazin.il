@@ -264,6 +264,7 @@ textarea{resize:vertical;line-height:1.6}
         <div style="display: flex; gap: 10px; font-size: 0.85rem;">
           <a href="full-code-editor.html" style="color: #aaa; text-decoration: none;">💻 עורך קוד</a>
           <a href="code-manager.html" style="color: #aaa; text-decoration: none;">📊 קודים</a>
+          <a href="newsletter.html" style="color: #aaa; text-decoration: none;">📧 ניוזלטר</a>
           <a href="style-editor.html" style="color: #aaa; text-decoration: none;">🎨 עיצוב</a>
           <a href="backup.html" style="color: #aaa; text-decoration: none;">💾 גיבוי</a>
         </div>
@@ -495,6 +496,10 @@ textarea{resize:vertical;line-height:1.6}
         <span class="tool-icon">📊</span>
         <span>קודים</span>
       </a>
+      <a href="newsletter.html" class="tool-btn">
+        <span class="tool-icon">📧</span>
+        <span>ניוזלטר</span>
+      </a>
       <a href="style-editor.html" class="tool-btn">
         <span class="tool-icon">🎨</span>
         <span>עיצוב</span>
@@ -633,9 +638,23 @@ textarea{resize:vertical;line-height:1.6}
 
 <div class="toast" id="toast"></div>
 
-<script src="../js/articles.js">
-document.getElementById('sheets-modal').addEventListener('click', function(e){ 
-  if(e.target===this) closeSheetsConfig(); 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script src="../js/articles.js"></script>
+<script>
+// Note: this was previously a dead <script src=".."> tag with inline content —
+// browsers ignore inline content on a script tag that also has a src, so this
+// close-on-outside-click handler never actually ran. Moved to DOMContentLoaded
+// since the #sheets-modal element itself is defined further down the page.
+document.addEventListener('DOMContentLoaded', function(){
+  var sheetsModal = document.getElementById('sheets-modal');
+  if (sheetsModal) {
+    sheetsModal.addEventListener('click', function(e){
+      if (e.target === this) closeSheetsConfig();
+    });
+  }
 });
 </script>
 <script>
@@ -855,7 +874,7 @@ function toggleMode() {
 // ── SAVE ──
 document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
 
-function saveArticle() {
+async function saveArticle() {
   var title    = document.getElementById('f-title').value.trim();
   var cat      = document.getElementById('f-cat').value;
   var excerpt  = document.getElementById('f-excerpt').value.trim();
@@ -871,9 +890,14 @@ function saveArticle() {
     alert('נא למלא: כותרת, קטגוריה, תקציר ותוכן'); return;
   }
   var data = { title:title, category:cat, emoji:emoji, image:image, excerpt:excerpt, content:content, date:date, readTime:readTime, featured:featured };
-  if (editId) { updateArticle(editId, data); showToast('✅ הכתבה עודכנה!'); }
-  else        { addArticle(data);            showToast('✅ הכתבה נוספה!'); }
-  resetForm(); renderList();
+  try {
+    if (editId) { await updateArticle(editId, data); showToast('✅ הכתבה עודכנה!'); }
+    else        { await addArticle(data);            showToast('✅ הכתבה נוספה!'); }
+    resetForm();
+    await renderList();
+  } catch (err) {
+    alert('❌ שגיאה בשמירה לפיירבייס. נסה שוב.');
+  }
 }
 
 function resetForm() {
@@ -893,8 +917,8 @@ function resetForm() {
   document.getElementById('char-count').textContent = '0 תווים';
 }
 
-function editArticle(id) {
-  var a = getArticleById(id); if (!a) return;
+async function editArticle(id) {
+  var a = await getArticleById(id); if (!a) return;
   document.getElementById('edit-id').value = a.id;
   document.getElementById('f-title').value = a.title;
   document.getElementById('f-cat').value = a.category;
@@ -919,24 +943,24 @@ function editArticle(id) {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function duplicateArticle(id, title) {
-  const articles = JSON.parse(localStorage.getItem("pulsar_articles") || "[]");
-  const original = articles.find(a => a.id === id);
+async function duplicateArticle(id, title) {
+  const original = await getArticleById(id);
   if (!original) { alert("כתבה לא נמצאה"); return; }
-  const dup = {...original, id: String(Date.now()), title: original.title + " (העתק)", date: new Date().toISOString().split("T")[0], featured: false};
-  articles.push(dup);
-  localStorage.setItem("pulsar_articles", JSON.stringify(articles));
+  const dup = {...original, title: original.title + " (העתק)", date: new Date().toISOString().split("T")[0], featured: false};
+  await addArticle(dup); // addArticle assigns dup a fresh id
   alert("✅ כתבה שוכפלה!");
-  location.reload();
+  await renderList();
 }
-function confirmDelete(id, title) {
+async function confirmDelete(id, title) {
   if (confirm('למחוק:\n"' + title + '"?')) {
-    deleteArticle(id); renderList(); showToast('🗑️ נמחקה');
+    await deleteArticle(id);
+    await renderList();
+    showToast('🗑️ נמחקה');
   }
 }
 
-function renderList() {
-  var articles = getArticles();
+async function renderList() {
+  var articles = await getArticles();
   document.getElementById('list-count').textContent = articles.length + ' כתבות';
   if (!articles.length) {
     document.getElementById('articles-list').innerHTML = '<p style="color:var(--mid);text-align:center;padding:3rem">אין כתבות עדיין.</p>';
@@ -1304,9 +1328,9 @@ function removePopupByIndex(i) {
   showToast('🗑️ הפופאפ הוסר');
 }
 
-// ── GOOGLE SHEETS CONFIG ──
-function openSheetsConfig() {
-  const url = localStorage.getItem('sheets-api-url') || '';
+// ── GOOGLE SHEETS CONFIG ── (webhook URL lives in Firebase: /settings/sheetsWebhookUrl)
+async function openSheetsConfig() {
+  const url = await getSheetsWebhookUrl();
   document.getElementById('sheets-url-input').value = url;
   document.getElementById('sheets-modal').style.display = 'flex';
 }
@@ -1318,7 +1342,7 @@ function closeSheetsConfig() {
 function saveSheetsConfig() {
   const url = document.getElementById('sheets-url-input').value.trim();
   if (!url) { alert('הדבק את ה-URL'); return; }
-  
+
   // Test connection
   testSheetsConnection(url);
 }
@@ -1328,8 +1352,8 @@ function testSheetsConnection(url) {
     method: 'POST',
     mode: 'no-cors',
     body: new URLSearchParams({ test: 'true' })
-  }).then(() => {
-    localStorage.setItem('sheets-api-url', url);
+  }).then(async () => {
+    await saveSheetsWebhookUrl(url);
     updateSheetsStatus(true);
     showToast('✅ מחובר ל-Google Sheets!');
     setTimeout(() => closeSheetsConfig(), 1000);
@@ -1351,16 +1375,30 @@ function updateSheetsStatus(connected) {
   }
 }
 
+function getSheetsWebhookUrl() {
+  if (typeof database !== 'undefined') {
+    return database.ref('settings/sheetsWebhookUrl').once('value')
+      .then(snap => snap.val() || '')
+      .catch(() => localStorage.getItem('sheets-api-url') || '');
+  }
+  return Promise.resolve(localStorage.getItem('sheets-api-url') || '');
+}
+
+function saveSheetsWebhookUrl(url) {
+  if (typeof database !== 'undefined') {
+    return database.ref('settings/sheetsWebhookUrl').set(url)
+      .catch(err => { console.error('❌ Firebase save failed:', err); localStorage.setItem('sheets-api-url', url); });
+  }
+  localStorage.setItem('sheets-api-url', url);
+  return Promise.resolve();
+}
+
 // Check status on load
-(function() {
-  const url = localStorage.getItem('sheets-api-url');
+(async function() {
+  const url = await getSheetsWebhookUrl();
   const indicator = document.getElementById('sheets-status-dot');
   if (indicator) {
-    if (url && url.length > 0) {
-      updateSheetsStatus(true);
-    } else {
-      updateSheetsStatus(false);
-    }
+    updateSheetsStatus(!!(url && url.length > 0));
   }
 })();
 

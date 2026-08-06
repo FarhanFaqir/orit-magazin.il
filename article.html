@@ -170,12 +170,16 @@
 
 <div class="toast" id="toast">✅ נרשמת!</div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
 <script src="js/articles.js"></script>
 <script>
-function init() {
+async function init() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
-  const article = id ? getArticleById(id) : null;
+  const article = id ? await getArticleById(id) : null;
 
   if (!article) {
     document.getElementById('article-output').innerHTML = `
@@ -215,7 +219,7 @@ function init() {
   }
 
   // Related articles
-  const all = getArticles();
+  const all = await getArticles();
   const related = all.filter(a => a.id !== article.id && a.category === article.category).slice(0, 4);
   if (related.length > 0) {
     document.getElementById('related-output').innerHTML = `
@@ -238,6 +242,10 @@ function init() {
 function handleSubscribe() {
   const email = document.getElementById('email-input').value.trim();
   if (!email || !email.includes('@')) { alert('נא להזין כתובת אימייל תקינה'); return; }
+  if (typeof database !== 'undefined') {
+    database.ref('newsletter').push({ email, timestamp: new Date().toISOString(), source: 'article' })
+      .catch(err => console.error('❌ Newsletter save failed:', err));
+  }
   const t = document.getElementById('toast');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
