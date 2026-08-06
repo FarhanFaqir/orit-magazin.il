@@ -1242,7 +1242,8 @@ function insertFormEmbed() {
 
   // בניית ה-wrapper כ-DOM node — שומר את ה-class
   var wrapper = document.createElement('div');
-  wrapper.className = 'embedded-form-block';
+  wrapper.className = 'embedded-form-block notranslate';
+  wrapper.setAttribute('translate', 'no'); // מונע מ-Google Translate לשבש display/position של הטופס
   wrapper.style.cssText = 'margin:1.5rem 0;border-radius:4px;overflow:hidden';
 
   var iframe = document.createElement('iframe');
@@ -1428,7 +1429,8 @@ function insertPopupEmbed() {
 
   // wrapper עם class לזיהוי
   var wrapper = document.createElement('div');
-  wrapper.className = 'embedded-popup-block';
+  wrapper.className = 'embedded-popup-block notranslate';
+  wrapper.setAttribute('translate', 'no'); // מונע מ-Google Translate לשבש display:none / position:fixed של הפופאפ
 
   // כפתור פתיחה (לטריגר button)
   if (trigger === 'button') {
