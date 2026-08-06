@@ -1,48 +1,35 @@
 // ── CODE INJECTOR ──
-// Loads codes from localStorage and injects them into the page
+// Loads tracking codes from Firebase (/settings/codes) and injects them into
+// the page. Falls back to the old per-key localStorage values if Firebase
+// isn't available, so the site doesn't lose tracking if the DB is briefly down.
 
 function injectSavedCodes() {
-  // Google Tag Manager
-  const gtmId = localStorage.getItem('code_gtm');
-  if (gtmId) {
-    injectGTM(gtmId);
+  getStoredCodes().then(codes => {
+    if (!codes) return;
+    if (codes.gtm)    injectGTM(codes.gtm);
+    if (codes.fb)     injectFacebookPixel(codes.fb);
+    if (codes.ga)     injectGA4(codes.ga);
+    if (codes.hj)     injectHotjar(codes.hj);
+    if (codes.tb)     injectCustomCode(codes.tb);
+    if (codes.ob)     injectCustomCode(codes.ob);
+    if (codes.custom) injectCustomCode(codes.custom);
+  }).catch(err => console.error('❌ Failed to load tracking codes:', err));
+}
+
+function getStoredCodes() {
+  if (typeof database !== 'undefined') {
+    return database.ref('settings/codes').once('value').then(snap => snap.val() || {});
   }
-  
-  // Facebook Pixel
-  const fbId = localStorage.getItem('code_fb');
-  if (fbId) {
-    injectFacebookPixel(fbId);
-  }
-  
-  // Google Analytics 4
-  const gaId = localStorage.getItem('code_ga');
-  if (gaId) {
-    injectGA4(gaId);
-  }
-  
-  // Hotjar
-  const hjId = localStorage.getItem('code_hj');
-  if (hjId) {
-    injectHotjar(hjId);
-  }
-  
-  // Taboola
-  const tbCode = localStorage.getItem('code_tb');
-  if (tbCode) {
-    injectCustomCode(tbCode);
-  }
-  
-  // Outbrain
-  const obCode = localStorage.getItem('code_ob');
-  if (obCode) {
-    injectCustomCode(obCode);
-  }
-  
-  // Custom Code
-  const customCode = localStorage.getItem('code_custom');
-  if (customCode) {
-    injectCustomCode(customCode);
-  }
+  // Fallback — old localStorage keys
+  return Promise.resolve({
+    gtm: localStorage.getItem('code_gtm'),
+    fb: localStorage.getItem('code_fb'),
+    ga: localStorage.getItem('code_ga'),
+    hj: localStorage.getItem('code_hj'),
+    tb: localStorage.getItem('code_tb'),
+    ob: localStorage.getItem('code_ob'),
+    custom: localStorage.getItem('code_custom')
+  });
 }
 
 // ── INJECT GTM ──

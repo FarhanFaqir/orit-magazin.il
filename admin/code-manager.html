@@ -387,8 +387,12 @@
   <a href="/" class="test-link">👈 חזור לעמוד הבית</a>
 </div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
 <script>
-// Codes configuration
+// Codes configuration — values live in Firebase at /settings/codes/{key}
 const CODES = {
   gtm: { name: 'Google Tag Manager', type: 'gtm-id' },
   fb: { name: 'Facebook Pixel', type: 'fb-id' },
@@ -399,53 +403,82 @@ const CODES = {
   custom: { name: 'Custom Code', type: 'custom-js' }
 };
 
+let codesCache = {};
+
 // ── LOAD ON PAGE LOAD ──
-function loadAllCodes() {
+async function loadAllCodes() {
+  codesCache = await getAllCodes();
   Object.keys(CODES).forEach(key => {
-    const stored = localStorage.getItem(`code_${key}`);
+    const stored = codesCache[key];
     if (stored) {
       document.getElementById(`${key}Code`).value = stored;
-      updateStatus(key);
     }
+    updateStatus(key);
   });
   updateStatusOverview();
 }
 
+function getAllCodes() {
+  if (typeof database !== 'undefined') {
+    return database.ref('settings/codes').once('value').then(snap => snap.val() || {});
+  }
+  // Fallback — old per-key localStorage values
+  const codes = {};
+  Object.keys(CODES).forEach(key => { codes[key] = localStorage.getItem(`code_${key}`) || ''; });
+  return Promise.resolve(codes);
+}
+
 // ── SAVE CODE ──
-function saveCode(key) {
+async function saveCode(key) {
   const code = document.getElementById(`${key}Code`).value.trim();
-  
+
   if (!code) {
     showMessage(`${key}Message`, 'נא להדביק קוד', 'error');
     return;
   }
-  
-  localStorage.setItem(`code_${key}`, code);
-  showMessage(`${key}Message`, '✅ קוד נשמר בהצלחה!', 'success');
-  updateStatus(key);
-  updateStatusOverview();
-  
-  // Auto-inject if GTM/GA/FB
-  injectCodes();
+
+  try {
+    if (typeof database !== 'undefined') {
+      await database.ref(`settings/codes/${key}`).set(code);
+    } else {
+      localStorage.setItem(`code_${key}`, code);
+    }
+    codesCache[key] = code;
+    showMessage(`${key}Message`, '✅ קוד נשמר בהצלחה!', 'success');
+    updateStatus(key);
+    updateStatusOverview();
+  } catch (err) {
+    console.error('❌ Firebase save failed:', err);
+    showMessage(`${key}Message`, '❌ שגיאה בשמירה', 'error');
+  }
 }
 
 // ── DELETE CODE ──
-function deleteCode(key) {
+async function deleteCode(key) {
   if (confirm(`בטוח שברצונך למחוק ${CODES[key].name}?`)) {
-    localStorage.removeItem(`code_${key}`);
-    document.getElementById(`${key}Code`).value = '';
-    showMessage(`${key}Message`, '🗑️ קוד נמחק', 'success');
-    updateStatus(key);
-    updateStatusOverview();
-    injectCodes();
+    try {
+      if (typeof database !== 'undefined') {
+        await database.ref(`settings/codes/${key}`).remove();
+      } else {
+        localStorage.removeItem(`code_${key}`);
+      }
+      delete codesCache[key];
+      document.getElementById(`${key}Code`).value = '';
+      showMessage(`${key}Message`, '🗑️ קוד נמחק', 'success');
+      updateStatus(key);
+      updateStatusOverview();
+    } catch (err) {
+      console.error('❌ Firebase delete failed:', err);
+      showMessage(`${key}Message`, '❌ שגיאה במחיקה', 'error');
+    }
   }
 }
 
 // ── UPDATE STATUS ──
 function updateStatus(key) {
-  const code = localStorage.getItem(`code_${key}`);
+  const code = codesCache[key];
   const statusEl = document.getElementById(`${key}Status`);
-  
+
   if (code) {
     statusEl.innerHTML = `<span class="status-indicator status-active"></span><strong>פעיל</strong> - קוד מוגדר`;
   } else {
@@ -457,16 +490,16 @@ function updateStatus(key) {
 function updateStatusOverview() {
   const overview = document.getElementById('statusOverview');
   let html = '';
-  
+
   Object.keys(CODES).forEach(key => {
-    const code = localStorage.getItem(`code_${key}`);
+    const code = codesCache[key];
     const status = code ? '✅ פעיל' : '❌ ריק';
     html += `<div class="status-row">
       <span class="status-label">${CODES[key].name}</span>
       <span>${status}</span>
     </div>`;
   });
-  
+
   overview.innerHTML = html;
 }
 
@@ -475,16 +508,10 @@ function showMessage(elementId, text, type) {
   const el = document.getElementById(elementId);
   el.textContent = text;
   el.className = `message ${type}`;
-  
+
   setTimeout(() => {
     el.className = 'message';
   }, 3000);
-}
-
-// ── INJECT CODES TO PAGES ──
-function injectCodes() {
-  // This function will be called by the main site to inject codes
-  console.log('Codes updated. Refresh the page to see changes.');
 }
 
 // ── INITIALIZE ──

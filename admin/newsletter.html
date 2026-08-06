@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניוזלטר - ישראל מגזין</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    direction: rtl;
+    padding: 20px;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  h1 { font-size: 1.8rem; color: #c8352a; }
+  .back-link { font-size: 0.85rem; color: #666; text-decoration: none; }
+  .back-link:hover { color: #c8352a; }
+
+  .info-box {
+    background: #e3f2fd;
+    border-right: 4px solid #2196F3;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    color: #0d47a1;
+  }
+
+  .stats-row { display: flex; gap: 15px; margin-bottom: 20px; }
+  .stat-card {
+    background: white;
+    padding: 18px 22px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    flex: 1;
+  }
+  .stat-num { font-size: 1.8rem; font-weight: 900; color: #0f0f0f; }
+  .stat-label { font-size: 0.8rem; color: #999; margin-top: 4px; }
+
+  .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
+  button {
+    padding: 10px 18px;
+    background: #0f0f0f;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Heebo';
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  button:hover { background: #c8352a; }
+  button.secondary { background: #2196F3; }
+  button.secondary:hover { background: #1976D2; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+
+  .card {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 200px 90px 70px;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+  }
+  .row.head {
+    background: #fafafa;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #888;
+  }
+  .row:last-child { border-bottom: none; }
+  .row-email { direction: ltr; text-align: right; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row-date { color: #666; font-size: 0.85rem; }
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: #f0f0f0;
+    color: #666;
+    width: fit-content;
+  }
+  .badge.home { background: #e3f2fd; color: #0d47a1; }
+  .badge.article { background: #fce4ec; color: #ad1457; }
+
+  .del-btn {
+    background: transparent;
+    color: #c8352a;
+    border: 1px solid #fcc;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+  .del-btn:hover { background: #fff0f0; border-color: #c8352a; }
+
+  .empty-state, .loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+  }
+
+  @media (max-width: 700px) {
+    .row { grid-template-columns: 1fr 60px; }
+    .row-date, .row .badge { display: none; }
+    .stats-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <h1>📧 רשימת ניוזלטר</h1>
+    <a href="index.html" class="back-link">← חזרה לניהול</a>
+  </div>
+
+  <div class="info-box">
+    כל מי שנרשם דרך תיבת "רוצה לקבל את הכתבות הכי טובות" בעמוד הבית או בכתבות מופיע כאן. הנתונים נשמרים ב-Firebase (/newsletter).
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-total">–</div><div class="stat-label">סה"כ נרשמים</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-today">–</div><div class="stat-label">נרשמו היום</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-week">–</div><div class="stat-label">7 ימים אחרונים</div></div>
+  </div>
+
+  <div class="toolbar">
+    <button class="secondary" onclick="exportCSV()" id="export-btn" disabled>⬇️ ייצוא ל-CSV</button>
+    <button onclick="loadNewsletter()">🔄 רענן</button>
+  </div>
+
+  <div class="card">
+    <div class="row head">
+      <span>אימייל</span>
+      <span>תאריך הרשמה</span>
+      <span>מקור</span>
+      <span></span>
+    </div>
+    <div id="list-container">
+      <div class="loading-state">טוען...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script>
+// ── AUTH (same gate + session as the main admin panel) ──
+(function(){
+  var PASS = '3426', KEY = 'pulsar_admin_auth';
+  if (sessionStorage.getItem(KEY) === 'ok') return;
+  var p = prompt('🔐 סיסמת ניהול:');
+  if (p === PASS) { sessionStorage.setItem(KEY, 'ok'); }
+  else {
+    document.body.innerHTML = '<div style="text-align:center;padding:4rem;font-family:sans-serif"><h2 style="color:#c8352a">גישה נדחתה</h2><p style="margin-top:1rem"><a href="../index.html">← חזרה לאתר</a></p></div>';
+    throw new Error('Unauthorized');
+  }
+})();
+
+let subscribers = [];
+
+async function loadNewsletter() {
+  document.getElementById('list-container').innerHTML = '<div class="loading-state">טוען...</div>';
+  if (typeof database === 'undefined') {
+    document.getElementById('list-container').innerHTML = '<div class="empty-state">⚠️ Firebase לא נטען. בדוק את js/firebase-config.js</div>';
+    return;
+  }
+  try {
+    const snap = await database.ref('newsletter').once('value');
+    const val = snap.val() || {};
+    subscribers = Object.entries(val).map(([key, v]) => ({ key, ...v }));
+    subscribers.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+    render();
+  } catch (err) {
+    console.error('❌ Failed to load newsletter list:', err);
+    document.getElementById('list-container').innerHTML = '<div class="empty-state">❌ שגיאה בטעינה. נסה לרענן.</div>';
+  }
+}
+
+function render() {
+  renderStats();
+  const container = document.getElementById('list-container');
+  const exportBtn = document.getElementById('export-btn');
+  exportBtn.disabled = subscribers.length === 0;
+
+  if (!subscribers.length) {
+    container.innerHTML = '<div class="empty-state">אין נרשמים עדיין.</div>';
+    return;
+  }
+
+  container.innerHTML = subscribers.map(s => `
+    <div class="row">
+      <span class="row-email">${escapeHtml(s.email || '')}</span>
+      <span class="row-date">${formatDateTime(s.timestamp)}</span>
+      <span class="badge ${s.source || ''}">${s.source === 'article' ? 'כתבה' : 'בית'}</span>
+      <button class="del-btn" onclick="deleteSubscriber('${s.key}')">🗑 מחק</button>
+    </div>
+  `).join('');
+}
+
+function renderStats() {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  document.getElementById('stat-total').textContent = subscribers.length;
+  document.getElementById('stat-today').textContent = subscribers.filter(s => s.timestamp && new Date(s.timestamp) >= startOfToday).length;
+  document.getElementById('stat-week').textContent = subscribers.filter(s => s.timestamp && new Date(s.timestamp) >= weekAgo).length;
+}
+
+async function deleteSubscriber(key) {
+  if (!confirm('למחוק את הנרשם הזה מהרשימה?')) return;
+  try {
+    await database.ref('newsletter/' + key).remove();
+    subscribers = subscribers.filter(s => s.key !== key);
+    render();
+  } catch (err) {
+    console.error('❌ Failed to delete subscriber:', err);
+    alert('❌ שגיאה במחיקה');
+  }
+}
+
+function exportCSV() {
+  if (!subscribers.length) return;
+  const rows = [['Email', 'Timestamp', 'Source']];
+  subscribers.forEach(s => rows.push([s.email || '', s.timestamp || '', s.source || '']));
+  const csv = rows.map(r => r.map(f => `"${String(f).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function formatDateTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  if (isNaN(d)) return '—';
+  return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' }) +
+    ' · ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+loadNewsletter();
+</script>
+</body>
+</html>

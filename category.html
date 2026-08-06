@@ -84,18 +84,22 @@
   <div class="footer-copy">© 2025 ישראל מגזין</div>
 </footer>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
 <script src="js/articles.js"></script>
 <script>
 const CATEGORIES = ['נדל"ן', 'קוסמטיקה', 'בריאות', 'לייף סטייל', 'שיווק'];
 
-document.getElementById('nav-cats').innerHTML = CATEGORIES.map(c =>
+document.querySelector('.nav-cats').innerHTML = CATEGORIES.map(c =>
   `<li><a href="category.html?cat=${encodeURIComponent(c)}">${c}</a></li>`
 ).join('');
 
-function init() {
+async function init() {
   const params = new URLSearchParams(window.location.search);
   const cat = params.get('cat') || '';
-  const all = getArticles();
+  const all = await getArticles();
   const articles = all.filter(a => a.category === cat || a.category === cat.replace('"','״'));
 
   document.title = `ישראל מגזין | ${cat}`;

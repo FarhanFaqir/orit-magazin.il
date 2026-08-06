@@ -144,6 +144,10 @@
 
 <div class="toast" id="toast">✅ נרשמת בהצלחה! נתראה בתיבה 📬</div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
 <script src="js/articles.js"></script>
 <script>
 const CATEGORIES = ['נדל"ן', 'קוסמטיקה', 'בריאות', 'לייף סטייל', 'שיווק'];
@@ -202,8 +206,8 @@ function renderCategories(articles) {
   out.innerHTML = html;
 }
 
-function init() {
-  const articles = getArticles();
+async function init() {
+  const articles = await getArticles();
   renderHero(articles);
   renderCategories(articles);
 }
@@ -211,6 +215,10 @@ function init() {
 function handleSubscribe() {
   const email = document.getElementById('email-input').value.trim();
   if (!email || !email.includes('@')) { alert('נא להזין כתובת אימייל תקינה'); return; }
+  if (typeof database !== 'undefined') {
+    database.ref('newsletter').push({ email, timestamp: new Date().toISOString(), source: 'home' })
+      .catch(err => console.error('❌ Newsletter save failed:', err));
+  }
   const t = document.getElementById('toast');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
