@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>לידים - ישראל מגזין</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    direction: rtl;
+    padding: 20px;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  h1 { font-size: 1.8rem; color: #c8352a; }
+  .back-link { font-size: 0.85rem; color: #666; text-decoration: none; }
+  .back-link:hover { color: #c8352a; }
+
+  .info-box {
+    background: #e3f2fd;
+    border-right: 4px solid #2196F3;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    color: #0d47a1;
+  }
+
+  .stats-row { display: flex; gap: 15px; margin-bottom: 20px; }
+  .stat-card {
+    background: white;
+    padding: 18px 22px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    flex: 1;
+  }
+  .stat-num { font-size: 1.8rem; font-weight: 900; color: #0f0f0f; }
+  .stat-label { font-size: 0.8rem; color: #999; margin-top: 4px; }
+
+  .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  button {
+    padding: 10px 18px;
+    background: #0f0f0f;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Heebo';
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  button:hover { background: #c8352a; }
+  button.secondary { background: #2196F3; }
+  button.secondary:hover { background: #1976D2; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+
+  .search-input {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-family: 'Heebo';
+    font-size: 0.85rem;
+    direction: rtl;
+  }
+  .search-input:focus { outline: none; border-color: #c8352a; }
+
+  .card {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .lead-row {
+    padding: 14px 20px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+  }
+  .lead-row:last-child { border-bottom: none; }
+  .lead-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
+  .lead-main { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+  .lead-name { font-weight: 700; font-size: 0.95rem; }
+  .lead-phone { direction: ltr; text-align: right; color: #444; font-size: 0.85rem; }
+  .lead-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .lead-date { color: #999; font-size: 0.78rem; white-space: nowrap; }
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: #f0f0f0;
+    color: #666;
+    white-space: nowrap;
+  }
+  .badge.embed { background: #e3f2fd; color: #0d47a1; }
+  .badge.popup { background: #fce4ec; color: #ad1457; }
+  .badge.article-id { background: #fff3cd; color: #856404; }
+
+  .lead-details {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #ddd;
+    font-size: 0.85rem;
+  }
+  .lead-details.show { display: block; }
+  .detail-row { display: flex; gap: 8px; padding: 3px 0; }
+  .detail-key { color: #999; min-width: 110px; font-weight: 600; }
+  .detail-val { color: #333; word-break: break-word; }
+
+  .del-btn {
+    background: transparent;
+    color: #c8352a;
+    border: 1px solid #fcc;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    margin-top: 10px;
+  }
+  .del-btn:hover { background: #fff0f0; border-color: #c8352a; }
+
+  .empty-state, .loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+  }
+
+  @media (max-width: 700px) {
+    .stats-row { flex-direction: column; }
+    .lead-top { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <h1>🧲 לידים</h1>
+    <a href="index.html" class="back-link">← חזרה לניהול</a>
+  </div>
+
+  <div class="info-box">
+    כל שליחה של טופס בכתבה (ווידג'ט מוטמע, פופאפ, או כל טופס עם class="sheets-form") נשמרת כאן. הנתונים ב-Firebase (/leads).
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-total">–</div><div class="stat-label">סה"כ לידים</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-today">–</div><div class="stat-label">היום</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-week">–</div><div class="stat-label">7 ימים אחרונים</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" class="search-input" id="search-input" placeholder="חיפוש לפי שם / טלפון / כתבה..." oninput="applyFilter()">
+    <button class="secondary" onclick="exportCSV()" id="export-btn" disabled>⬇️ ייצוא ל-CSV</button>
+    <button onclick="loadLeads()">🔄 רענן</button>
+  </div>
+
+  <div class="card">
+    <div id="list-container">
+      <div class="loading-state">טוען...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script>
+// ── AUTH (same gate + session as the main admin panel) ──
+(function(){
+  var PASS = '3426', KEY = 'pulsar_admin_auth';
+  if (sessionStorage.getItem(KEY) === 'ok') return;
+  var p = prompt('🔐 סיסמת ניהול:');
+  if (p === PASS) { sessionStorage.setItem(KEY, 'ok'); }
+  else {
+    document.body.innerHTML = '<div style="text-align:center;padding:4rem;font-family:sans-serif"><h2 style="color:#c8352a">גישה נדחתה</h2><p style="margin-top:1rem"><a href="../index.html">← חזרה לאתר</a></p></div>';
+    throw new Error('Unauthorized');
+  }
+})();
+
+let leads = [];
+let filtered = [];
+
+// Fields shown prominently on the collapsed row; everything else in a lead
+// goes into the expandable details section. Leads can come from different
+// forms (the kupot widget, or any generic .sheets-form), so field shapes vary.
+const NAME_KEYS = ['name', 'firstName', 'Name'];
+const PHONE_KEYS = ['phone', 'Phone'];
+const TOP_KEYS = new Set(['key', 'timestamp', 'Timestamp', 'articleId', 'source', ...NAME_KEYS, ...PHONE_KEYS]);
+
+async function loadLeads() {
+  document.getElementById('list-container').innerHTML = '<div class="loading-state">טוען...</div>';
+  if (typeof database === 'undefined') {
+    document.getElementById('list-container').innerHTML = '<div class="empty-state">⚠️ Firebase לא נטען. בדוק את js/firebase-config.js</div>';
+    return;
+  }
+  try {
+    const snap = await database.ref('leads').once('value');
+    const val = snap.val() || {};
+    leads = Object.entries(val).map(([key, v]) => ({ key, ...v }));
+    leads.sort((a, b) => new Date(b.timestamp || b.Timestamp || 0) - new Date(a.timestamp || a.Timestamp || 0));
+    applyFilter();
+  } catch (err) {
+    console.error('❌ Failed to load leads:', err);
+    document.getElementById('list-container').innerHTML = '<div class="empty-state">❌ שגיאה בטעינה. נסה לרענן.</div>';
+  }
+}
+
+function applyFilter() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  filtered = !q ? leads : leads.filter(l => JSON.stringify(l).toLowerCase().includes(q));
+  render();
+}
+
+function getField(lead, keys) {
+  for (const k of keys) { if (lead[k]) return lead[k]; }
+  return '';
+}
+
+function render() {
+  renderStats();
+  const container = document.getElementById('list-container');
+  const exportBtn = document.getElementById('export-btn');
+  exportBtn.disabled = leads.length === 0;
+
+  if (!leads.length) {
+    container.innerHTML = '<div class="empty-state">אין לידים עדיין.</div>';
+    return;
+  }
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty-state">אין תוצאות תואמות לחיפוש.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(l => {
+    const name = getField(l, NAME_KEYS) || '(ללא שם)';
+    const phone = getField(l, PHONE_KEYS);
+    const ts = l.timestamp || l.Timestamp || '';
+    const source = l.source || '';
+    const articleId = l.articleId || '';
+    const otherEntries = Object.entries(l).filter(([k]) => !TOP_KEYS.has(k));
+
+    return `
+      <div class="lead-row">
+        <div class="lead-top" onclick="toggleDetails('${l.key}')">
+          <div class="lead-main">
+            <div class="lead-name">${escapeHtml(name)}</div>
+            ${phone ? `<div class="lead-phone">${escapeHtml(phone)}</div>` : ''}
+          </div>
+          <div class="lead-meta">
+            ${articleId ? `<span class="badge article-id">כתבה #${escapeHtml(articleId)}</span>` : ''}
+            ${source ? `<span class="badge ${source}">${source === 'popup' ? 'פופאפ' : source === 'embed' ? 'מוטמע' : escapeHtml(source)}</span>` : ''}
+            <span class="lead-date">${formatDateTime(ts)}</span>
+          </div>
+        </div>
+        <div class="lead-details" id="details-${l.key}">
+          ${otherEntries.map(([k, v]) => `
+            <div class="detail-row"><span class="detail-key">${escapeHtml(k)}</span><span class="detail-val">${escapeHtml(String(v))}</span></div>
+          `).join('')}
+          <button class="del-btn" onclick="deleteLead('${l.key}', event)">🗑 מחק ליד</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleDetails(key) {
+  const el = document.getElementById('details-' + key);
+  if (el) el.classList.toggle('show');
+}
+
+function renderStats() {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const getDate = l => new Date(l.timestamp || l.Timestamp || 0);
+
+  document.getElementById('stat-total').textContent = leads.length;
+  document.getElementById('stat-today').textContent = leads.filter(l => getDate(l) >= startOfToday).length;
+  document.getElementById('stat-week').textContent = leads.filter(l => getDate(l) >= weekAgo).length;
+}
+
+async function deleteLead(key, event) {
+  if (event) event.stopPropagation();
+  if (!confirm('למחוק את הליד הזה?')) return;
+  try {
+    await database.ref('leads/' + key).remove();
+    leads = leads.filter(l => l.key !== key);
+    applyFilter();
+  } catch (err) {
+    console.error('❌ Failed to delete lead:', err);
+    alert('❌ שגיאה במחיקה');
+  }
+}
+
+function exportCSV() {
+  if (!leads.length) return;
+  // Union of every field across every lead, so the CSV works regardless of
+  // which form produced each row.
+  const allKeys = new Set();
+  leads.forEach(l => Object.keys(l).forEach(k => { if (k !== 'key') allKeys.add(k); }));
+  const headers = Array.from(allKeys);
+  const rows = [headers];
+  leads.forEach(l => rows.push(headers.map(h => l[h] || '')));
+  const csv = rows.map(r => r.map(f => `"${String(f).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `leads-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function formatDateTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  if (isNaN(d)) return String(ts); // some timestamps are already he-IL formatted strings
+  return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' }) +
+    ' · ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+loadLeads();
+</script>
+</body>
+</html>
