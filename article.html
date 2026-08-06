@@ -80,6 +80,11 @@
   }
   .article-body p { margin-bottom: 1.2rem; }
   .article-body strong { font-weight: 700; }
+  /* רשת בטיחות: כל תמונה שהוכנסה לתוכן (כולל הדבקה ישירה שמדלגת על
+     כפתור "תמונה" בעורך, שכן מוסיף style="max-width:100%" משלו) חייבת
+     להיות מוגבלת לרוחב העמודה — אחרת תמונה ברזולוציה מלאה (כמו צילום
+     מסך) גולשת מחוץ לעמוד ושוברת את הפריסה. */
+  .article-body img { max-width: 100%; height: auto; display: block; margin: 0.5rem 0; }
 
   .related-section {
     max-width: 760px;
@@ -176,7 +181,98 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/articles.js"></script>
 <script>
+// ── מצב תצוגה מקדימה חיה ──
+// כשהעמוד נטען בתוך iframe מהעורך (?preview=1), הוא לא פונה ל-Firebase
+// בכלל — הוא מציג בדיוק את הנתונים שמגיעים מהעורך דרך postMessage,
+// באותו רכיב רינדור בדיוק שמשמש כתבה אמיתית (אותה חוויה, 100%).
+const IS_PREVIEW = new URLSearchParams(window.location.search).get('preview') === '1';
+
+// שומר את הערכים האחרונים שכן צוירו, כדי לעדכן רק את מה שבאמת השתנה —
+// חשוב בעיקר בתצוגה מקדימה חיה, שקוראת לפונקציה הזו על כל הקלדה: בלי זה,
+// כל עדכון (אפילו בשדה טקסט לא קשור) היה הורס ובונה מחדש את התמונה, וגורם
+// לה "להבהב" כי הדפדפן מפענח מחדש base64 כבד בכל פעם.
+let lastRenderedArticle = {};
+
+function renderArticleContent(article) {
+  document.title = `ישראל מגזין | ${article.title || ''}`;
+
+  const isFirstRender = !document.getElementById('pv-cat');
+  if (isFirstRender) {
+    document.getElementById('article-output').innerHTML = `
+      <div class="article-wrap">
+        ${IS_PREVIEW ? '' : '<a href="index.html" class="article-back">→ חזרה לעמוד הבית</a>'}
+        <div class="article-cat" id="pv-cat"></div>
+        <h1 class="article-title" id="pv-title"></h1>
+        <div class="article-meta">
+          <span id="pv-date"></span>
+          <span id="pv-readtime"></span>
+        </div>
+        <p class="article-excerpt" id="pv-excerpt" style="display:none"></p>
+        <div id="pv-media"></div>
+        <div class="article-body" id="article-body-content"></div>
+      </div>
+    `;
+  }
+
+  const catEl = document.getElementById('pv-cat');
+  catEl.textContent = article.category || '';
+  catEl.style.color = getCategoryColor(article.category);
+  document.getElementById('pv-title').textContent = article.title || '(ללא כותרת)';
+  document.getElementById('pv-date').textContent = `📅 ${formatDate(article.date)}`;
+  document.getElementById('pv-readtime').textContent = `⏱ ${article.readTime || 5} דקות קריאה`;
+
+  const excerptEl = document.getElementById('pv-excerpt');
+  if (article.excerpt) { excerptEl.textContent = article.excerpt; excerptEl.style.display = ''; }
+  else { excerptEl.style.display = 'none'; }
+
+  // בלוק המדיה (תמונה/אמוג'י) נבנה מחדש רק כשהוא באמת משתנה
+  if (article.image !== lastRenderedArticle.image || article.emoji !== lastRenderedArticle.emoji) {
+    document.getElementById('pv-media').innerHTML = article.image
+      ? `<img src="${article.image}" style="width:100%;max-height:420px;object-fit:cover;display:block;margin-bottom:2rem">`
+      : `<div class="article-emoji-banner">${article.emoji || '📝'}</div>`;
+  }
+
+  // גוף הכתבה נבנה מחדש (וה-scripts שבתוכו מורצים) רק כשהתוכן באמת משתנה —
+  // מונע גם הרצה כפולה של טריגרים/פופאפים מוטמעים על כל הקלדה
+  if (article.content !== lastRenderedArticle.content) {
+    const body = document.getElementById('article-body-content');
+    body.innerHTML = article.content || '';
+    body.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach(a => newScript.setAttribute(a.name, a.value));
+      newScript.textContent = oldScript.textContent;
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+  }
+
+  lastRenderedArticle = article;
+}
+
 async function init() {
+  if (IS_PREVIEW) {
+    document.getElementById('article-output').innerHTML = `
+      <div class="article-wrap">
+        <p style="color:var(--mid);text-align:center;padding:4rem 0">ממתין לנתונים מהעורך…</p>
+      </div>`;
+    let lastPreviewArticle = {};
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'pulsar-preview-data' && e.data.article) {
+        const incoming = e.data.article;
+        // אם לא נשלחה תמונה בהודעה הזו, שמרים על האחרונה שכן נשלחה —
+        // כך לא צריך לשלוח שוב base64 כבד על כל שינוי טקסט קטן
+        if (!('image' in incoming)) incoming.image = lastPreviewArticle.image || '';
+        lastPreviewArticle = incoming;
+        renderArticleContent(incoming);
+      }
+    });
+    // הודע להורה שאנחנו מוכנים לקבל נתונים (מטפל במקרה שההודעה
+    // הראשונה מהעורך נשלחה לפני שה-iframe סיים להיטען)
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'pulsar-preview-ready' }, '*');
+    }
+    return; // לא פונים ל-Firebase במצב תצוגה מקדימה בכלל
+  }
+
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
   const article = id ? await getArticleById(id) : null;
@@ -189,34 +285,7 @@ async function init() {
     return;
   }
 
-  document.title = `ישראל מגזין | ${article.title}`;
-
-  document.getElementById('article-output').innerHTML = `
-    <div class="article-wrap">
-      <a href="index.html" class="article-back">→ חזרה לעמוד הבית</a>
-      <div class="article-cat" style="color:${getCategoryColor(article.category)}">${article.category}</div>
-      <h1 class="article-title">${article.title}</h1>
-      <div class="article-meta">
-        <span>📅 ${formatDate(article.date)}</span>
-        <span>⏱ ${article.readTime} דקות קריאה</span>
-      </div>
-      ${article.image
-        ? `<img src="${article.image}" style="width:100%;max-height:420px;object-fit:cover;display:block;margin-bottom:2rem">`
-        : `<div class="article-emoji-banner">${article.emoji}</div>`}
-      <div class="article-body" id="article-body-content">${article.content}</div>
-    </div>
-  `;
-
-  // ── הרץ scripts שהוכנסו לתוך הכתבה (פופאפים, טריגרים) ──
-  const body = document.getElementById('article-body-content');
-  if (body) {
-    body.querySelectorAll('script').forEach(oldScript => {
-      const newScript = document.createElement('script');
-      Array.from(oldScript.attributes).forEach(a => newScript.setAttribute(a.name, a.value));
-      newScript.textContent = oldScript.textContent;
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
-  }
+  renderArticleContent(article);
 
   // Related articles
   const all = await getArticles();

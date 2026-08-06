@@ -527,9 +527,15 @@ textarea{resize:vertical;line-height:1.6}
 <div class="list-panel">
     <div class="list-header">
       <h2>כל הכתבות</h2>
-      <span class="list-count" id="list-count"></span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="list-count" id="list-count"></span>
+        <button type="button" class="btn-sm" id="preview-toggle-btn" onclick="togglePreview()" style="border-color:#9b7ef0;color:#9b7ef0">🔍 תצוגה מקדימה חיה</button>
+      </div>
     </div>
     <div id="articles-list"></div>
+    <div id="preview-container" style="display:none">
+      <iframe id="live-preview-frame" src="../article.html?preview=1" style="width:100%;height:82vh;border:1px solid var(--line);border-radius:4px;background:white;display:block"></iframe>
+    </div>
   </div>
 </div>
 
@@ -692,6 +698,7 @@ document.getElementById('emoji-picker').innerHTML = EMOJIS.map(function(e){
 function selectEmoji(e) {
   document.getElementById('f-emoji').value = e;
   document.querySelectorAll('.emoji-btn').forEach(function(b){ b.classList.toggle('selected', b.textContent.trim()===e); });
+  schedulePreviewUpdate();
 }
 
 // ── MEDIA TABS ──
@@ -701,6 +708,7 @@ function switchMedia(mode) {
   document.querySelectorAll('.media-tab').forEach(function(t,i){ t.classList.toggle('active',(i===0&&mode==='image')||(i===1&&mode==='emoji')); });
   document.getElementById('tab-image').style.display = mode==='image' ? '' : 'none';
   document.getElementById('tab-emoji').style.display = mode==='emoji' ? '' : 'none';
+  schedulePreviewUpdate();
 }
 
 // ── IMAGE UPLOAD ──
@@ -716,6 +724,7 @@ function handleImageUpload(input) {
     prev.style.display = 'block';
     document.getElementById('upload-label').style.display = 'none';
     document.getElementById('upload-area').classList.add('has-img');
+    schedulePreviewUpdate();
   };
   reader.readAsDataURL(file);
 }
@@ -727,6 +736,7 @@ function removeImage(e) {
   document.getElementById('upload-label').style.display = '';
   document.getElementById('upload-area').classList.remove('has-img');
   document.getElementById('img-file').value = '';
+  schedulePreviewUpdate();
 }
 
 // ── EDITOR ──
@@ -865,8 +875,9 @@ function insertInlineImage(input) {
 function syncToHtml() {
   htmlArea.value = editor.innerHTML;
   document.getElementById('char-count').textContent = editor.innerText.length + ' תווים';
+  schedulePreviewUpdate();
 }
-function syncFromHtml() { editor.innerHTML = htmlArea.value; }
+function syncFromHtml() { editor.innerHTML = htmlArea.value; schedulePreviewUpdate(); }
 function toggleMode() {
   htmlMode = !htmlMode;
   if (htmlMode) {
@@ -1554,9 +1565,72 @@ function showToast(msg) {
   setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
 
+// ── תצוגה מקדימה חיה ──
+// שולח את נתוני הכתבה בטיוטה ל-iframe שמריץ את article.html?preview=1,
+// ומתעדכן על כל שינוי (עם debounce קטן שלא ישלח על כל תו). ה-iframe
+// עצמו לא פונה ל-Firebase במצב הזה — הוא רק מציג מה שנשלח אליו.
+var previewActive = false;
+var previewDebounceTimer = null;
+
+function togglePreview() {
+  previewActive = !previewActive;
+  document.getElementById('articles-list').style.display = previewActive ? 'none' : '';
+  document.getElementById('preview-container').style.display = previewActive ? '' : 'none';
+  document.getElementById('preview-toggle-btn').textContent = previewActive ? '📋 חזרה לרשימת הכתבות' : '🔍 תצוגה מקדימה חיה';
+  if (previewActive) sendPreviewData();
+}
+
+function buildDraftArticle() {
+  return {
+    id: document.getElementById('edit-id').value || 'preview',
+    title: document.getElementById('f-title').value,
+    category: document.getElementById('f-cat').value,
+    excerpt: document.getElementById('f-excerpt').value,
+    content: htmlMode ? htmlArea.value : editor.innerHTML,
+    date: document.getElementById('f-date').value,
+    readTime: document.getElementById('f-read').value || '5',
+    image: document.getElementById('f-image').value,
+    emoji: document.getElementById('f-emoji').value || '📝',
+    featured: document.getElementById('f-featured').checked
+  };
+}
+
+var lastSentImageValue; // מונע שליחה חוזרת של base64 כבד כשהתמונה לא השתנתה
+function sendPreviewData() {
+  if (!previewActive) return;
+  var frame = document.getElementById('live-preview-frame');
+  if (!frame || !frame.contentWindow) return;
+  var draft = buildDraftArticle();
+  if (draft.image === lastSentImageValue) {
+    delete draft.image; // ה-iframe ישמור על התמונה האחרונה שקיבל
+  } else {
+    lastSentImageValue = draft.image;
+  }
+  frame.contentWindow.postMessage({ type: 'pulsar-preview-data', article: draft }, '*');
+}
+
+function schedulePreviewUpdate() {
+  if (!previewActive) return;
+  clearTimeout(previewDebounceTimer);
+  previewDebounceTimer = setTimeout(sendPreviewData, 300);
+}
+
+// ה-iframe מודיע לנו כשהוא סיים להיטען ומוכן לקבל נתונים — פותר מרוץ
+// שבו השינוי הראשון בטופס קורה לפני שה-iframe סיים לטעון.
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'pulsar-preview-ready') sendPreviewData();
+});
+
+['f-title', 'f-cat', 'f-excerpt', 'f-date', 'f-read'].forEach(function(id) {
+  var el = document.getElementById(id);
+  el.addEventListener('input', schedulePreviewUpdate);
+  el.addEventListener('change', schedulePreviewUpdate);
+});
+document.getElementById('f-featured').addEventListener('change', schedulePreviewUpdate);
+
 renderList();
 
-document.getElementById('sheets-modal').addEventListener('click', function(e){ 
+document.getElementById('sheets-modal').addEventListener('click', function(e){
   if(e.target===this) closeSheetsConfig(); 
 });
 </script>
