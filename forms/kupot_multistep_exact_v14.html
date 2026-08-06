@@ -33,6 +33,9 @@ body{font-family:Arial,"Heebo",sans-serif;color:#111}
 .field{width:min(82vw,276px);margin:0 auto 10px}
 input{width:100%;height:50px;border:1px solid #ddd;border-radius:14px;padding:0 14px;font-size:16px;text-align:right;outline:none;background:#fff}
 input:focus{border-color:#9b7ef0;box-shadow:0 0 0 4px rgba(155,126,240,.15)}
+.field-error{display:none;color:#d33;font-size:13px;margin-top:6px;text-align:center}
+.field-error.show{display:block}
+input.invalid{border-color:#d33}
 .options{display:flex;flex-direction:column;gap:8px;width:min(82vw,276px)}
 .option{height:44px;border:1px solid #e4e4e7;border-radius:14px;background:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.05)}
 .option:active{transform:scale(.98)}
@@ -75,7 +78,7 @@ input:focus{border-color:#9b7ef0;box-shadow:0 0 0 4px rgba(155,126,240,.15)}
     <section class="step" data-step="1">
       <div class="selected-logo"><img id="selectedFundLogo" alt="קופת החולים שנבחרה"></div>
       <h2 class="question">מה שמך?</h2>
-      <div class="field"><input id="firstName" placeholder="שם מלא" autocomplete="name"></div>
+      <div class="field"><input id="firstName" placeholder="שם מלא" autocomplete="name"><div class="field-error" id="firstNameError">נא להזין שם</div></div>
       <div class="actions"><button class="back" type="button">חזרה</button><button class="next" type="button">המשך</button></div>
     </section>
 
@@ -114,7 +117,7 @@ input:focus{border-color:#9b7ef0;box-shadow:0 0 0 4px rgba(155,126,240,.15)}
 
     <section class="step" data-step="5">
       <h2 class="question">מה מספר הטלפון שלך?</h2>
-      <div class="field"><input id="phone" type="tel" inputmode="tel" placeholder="מספר טלפון" autocomplete="tel"></div>
+      <div class="field"><input id="phone" type="tel" inputmode="tel" placeholder="מספר טלפון" autocomplete="tel"><div class="field-error" id="phoneError">מספר טלפון לא תקין — נסו שוב</div></div>
       <div class="actions"><button class="back" type="button">חזרה</button><button class="submit" type="button">שליחה</button></div>
     </section>
 
@@ -138,12 +141,18 @@ const selectedLogos={"לאומית": "data:image/png;base64,/9j/4AAQSkZJRgABAQAA
 const fundClasses={'לאומית':'fund-leumit','מאוחדת':'fund-meuhedet','מכבי':'fund-maccabi','כללית':'fund-clalit'};
 function show(i){steps[current].classList.remove('active');current=i;steps[current].classList.add('active')}
 document.querySelectorAll('.kupa').forEach(b=>b.onclick=()=>{lead.fund=b.dataset.fund;selectedFundLogo.src=b.querySelector('img').src;selectedFundLogo.alt=lead.fund;selectedFundLogo.parentElement.className='selected-logo';show(1)});
-document.querySelector('[data-step="1"] .next').onclick=()=>{const v=firstName.value.trim();if(!v){firstName.focus();return}lead.firstName=v;lead.name=v;helloName.textContent='היי '+v;show(2)};
+document.querySelector('[data-step="1"] .next').onclick=()=>{const v=firstName.value.trim();if(!v){firstName.focus();firstName.classList.add('invalid');firstNameError.classList.add('show');return}firstName.classList.remove('invalid');firstNameError.classList.remove('show');lead.firstName=v;lead.name=v;helloName.textContent='היי '+v;show(2)};
+firstName.addEventListener('input',()=>{firstName.classList.remove('invalid');firstNameError.classList.remove('show')});
 document.querySelectorAll('.options').forEach(g=>g.querySelectorAll('.option').forEach(b=>b.onclick=()=>{lead[g.dataset.name]=b.dataset.value;show(current+1)}));
 document.querySelectorAll('.back').forEach(b=>b.onclick=()=>show(Math.max(0,current-1)));
 document.querySelector('.submit').onclick=()=>{
   const p=phone.value.trim();
-  if(!/^0[23489]-?\d{7}$|^05\d-?\d{7}$/.test(p)){phone.focus();return}
+  const d=p.replace(/[^\d]/g,''); // ספרות בלבד — מתעלם מ-+ / רווחים / מקפים
+  // מקומי: 0+קידומת+7 ספרות (קווי) או 05+ספרה+7 ספרות (נייד) | בינלאומי: 972 במקום ה-0 המוביל
+  const validLocal=/^0[23489]\d{7}$/.test(d)||/^05\d{8}$/.test(d);
+  const validIntl=/^972[23489]\d{7}$/.test(d)||/^9725\d{8}$/.test(d);
+  if(!validLocal&&!validIntl){phone.focus();phone.classList.add('invalid');phoneError.classList.add('show');return}
+  phone.classList.remove('invalid');phoneError.classList.remove('show');
   lead.phone=p;
 
   const whatsappMessage=[
@@ -165,6 +174,7 @@ document.querySelector('.submit').onclick=()=>{
   saveLead(lead);
   show(6);
 };
+phone.addEventListener('input',()=>{phone.classList.remove('invalid');phoneError.classList.remove('show')});
 
 // ── SAVE LEAD — Firebase (source of truth) + Google Sheets forward ──
 // Fire-and-forget: never blocks the success screen / WhatsApp button above.
