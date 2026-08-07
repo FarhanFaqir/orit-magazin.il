@@ -1,27 +1,34 @@
 ═════════════════════════════════════════════════════════════════
-📊 Apps Script — kupot widget → Manhattan Clinic leads sheet
+📊 Apps Script — kupot + moria widgets → Manhattan Clinic leads sheet
 Sheet: 17wWkgIqt4xrfTR4efaZSaSjCVwKpVrJHcqbhL9QKOzw ("SMART FORM - FORMS LEADS")
 ═════════════════════════════════════════════════════════════════
 
-This posts kupot-widget submissions into the SAME sheet Orit already
-uses, matching its existing columns exactly. Frontend-only — no
+Shared by BOTH lead-gen widgets (forms/kupot_multistep_exact_v14.html
+and forms/form-multi-steps-moria.html) — one Apps Script, one sheet,
+matching its existing columns exactly. Frontend-only — no
 service-account key involved anywhere, nothing that can leak.
 
-Column mapping used below:
+Column mapping used below (both widgets send the same parameter
+names, so the same doPost handles either one):
   A Date & Time   → timestamp
-  B Name          → lead.name
+  B Name          → lead's name
   C Wa link       → the wa.me link the widget already builds
   D Status        → left blank (matches how existing rows are filled
                     in manually, not by the form)
   E Q1 / F Q2     → left blank (that pair belongs to the older form
                     type already using this sheet — not touched)
-  G Form name     → "israel-magazine-kupot-widget"
+  G Form name     → "israel-magazine-kupot-widget" or
+                    "israel-magazine-moria-widget" (tells them apart)
   H Source page   → the article page the widget was on
-  I Phone number  → lead.phone
-  J Q1            → fund (קופת חולים)         — step 1 of the widget
-  K Q2            → treatment (מה רוצה להסיר)  — step 3
-  L Q3            → age (קבוצת גיל)            — step 4
-  M Q4            → clinic (קליניקה)           — step 5
+  I Phone number  → lead's phone
+  J Q1            → kupot: fund (קופת חולים)          — step 1
+                    moria: left blank (not collected by this form)
+  K Q2            → kupot: treatment (מה רוצה להסיר)   — step 3
+                    moria: lesions (כמה נגעים יש לך)    — step 3
+                    (closest available match — moria has no separate
+                    "treatment type" question, only lesion count)
+  L Q3            → age (קבוצת גיל / קבוצת גיל)         — both forms
+  M Q4            → clinic (קליניקה)                    — both forms
 
 שלב 1: פתחו את הגיליון הזה (SMART FORM - FORMS LEADS)
 ───────────────────────────────────────────────────────
@@ -67,7 +74,8 @@ Deploy → Copy את ה-URL
 שלב 3: תנו לי את ה-URL
 ─────────────────────────
 שלחו לי אותו ואני אשמור אותו ב-Firebase תחת
-/settings/kupotSheetsWebhookUrl — נפרד לגמרי מה-Sheets webhook
-הרגיל (כדי לא לערבב בין הפורמט של הטופס הכללי לפורמט הזה).
+/settings/manhattanSheetsWebhookUrl — נפרד לגמרי מה-Sheets webhook
+הרגיל (כדי לא לערבב בין הפורמט של הטופס הכללי לפורמט הזה). שני
+הווידג'טים (קופות ומוריה) קוראים מאותו מפתח.
 
 ═════════════════════════════════════════════════════════════════
