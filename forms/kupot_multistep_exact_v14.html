@@ -198,7 +198,7 @@ function saveLead(lead){
 
   // קיים על אותו גיליון שכבר בשימוש (Manhattan Clinic leads) — עמודות J-M
   // (Q1-Q4) ממופות ל-fund/treatment/age/clinic, בדיוק לפי סדר השלבים בטופס.
-  database.ref('settings/kupotSheetsWebhookUrl').once('value').then(snap=>{
+  database.ref('settings/manhattanSheetsWebhookUrl').once('value').then(snap=>{
     const url=snap.val();
     if(!url)return;
     return fetch(url,{method:'POST',mode:'no-cors',body:new URLSearchParams({

@@ -458,7 +458,8 @@ textarea{resize:vertical;line-height:1.6}
         <button type="button" class="tb-btn" style="background:#1a1a1a;color:white;border-color:#1a1a1a" onclick="saveCursor();openFormEmbed()">📋 טופס מוטמע</button>
         <button type="button" class="tb-btn" style="background:#2d6a9f;color:white;border-color:#2d6a9f;position:relative" onclick="openSheetsConfig()">📊 Sheets<span id="sheets-status-dot" style="position:absolute;width:8px;height:8px;background:#c8352a;border-radius:50%;right:4px;bottom:4px;border:1px solid white"></span></button>
         <button type="button" class="tb-btn" style="background:var(--red);color:white;border-color:var(--red)" onclick="saveCursor();openPopupEmbed()">🪟 פופאפ</button>
-        <button type="button" class="tb-btn" style="background:#9b7ef0;color:white;border-color:#9b7ef0" onclick="quickInsertKupotWidget()" title="מוסיף את טופס בדיקת ההתאמה בלי צורך בקוד">🏥 טופס קופות</button>
+        <button type="button" class="tb-btn" style="background:#9b7ef0;color:white;border-color:#9b7ef0" onclick="quickInsertKupotWidget()" title="מוסיף את טופס בדיקת ההתאמה (קופות חולים) בלי צורך בקוד">🏥 טופס קופות</button>
+        <button type="button" class="tb-btn" style="background:#e8762a;color:white;border-color:#e8762a" onclick="quickInsertMoriaWidget()" title="מוסיף את טופס מוריה (גיל/נגעים/קליניקה) בלי צורך בקוד">🩺 טופס מוריה</button>
         <div class="tb-sep"></div>
         <button type="button" class="tb-btn" onclick="fmt('undo')">↩</button>
         <button type="button" class="tb-btn" onclick="fmt('redo')">↪</button>
@@ -1235,27 +1236,39 @@ function insertBlock() {
   closeBlockModal();
   showToast('✅ הבלוק הוכנס!');
 }
-// ── טופס קופות (הווידג'ט הרב-שלבי) — הכנסה בלי צורך בקוד ──
+// ── טפסי לידים (הווידג'טים הרב-שלביים) — הכנסה בלי צורך בקוד ──
 // בונה את קוד ה-iframe הנכון עם ה-articleId של הכתבה הנוכחית, ופותח את
 // המודל המתאים (מוטמע/פופאפ) עם הקוד כבר ממולא — כל מה שנשאר זה ללחוץ הכנס.
-function quickInsertKupotWidget() {
+// שני הכפתורים (קופות / מוריה) קוראים לאותה פונקציה עם קובץ שונה, כדי
+// שיהיה ברור לצוות/ללקוחה איזה טופס נבחר — לא מוסתר מאחורי דיאלוג נוסף.
+var WIDGET_FORMS = {
+  kupot: { file: 'kupot_multistep_exact_v14.html', label: 'טופס קופות החולים', embedHeight: 520 },
+  moria: { file: 'form-multi-steps-moria.html',    label: 'טופס מוריה',          embedHeight: 700 }
+};
+
+function quickInsertKupotWidget() { quickInsertWidget('kupot'); }
+function quickInsertMoriaWidget() { quickInsertWidget('moria'); }
+
+function quickInsertWidget(which) {
+  var w = WIDGET_FORMS[which];
   var articleId = document.getElementById('edit-id').value;
   if (!articleId) {
-    alert('קודם צריך לשמור את הכתבה (💾 שמור כתבה), ואז לפתוח אותה שוב כדי להוסיף את טופס קופות החולים.\n\nהסיבה: לטופס צריך לדעת מספר כתבה, וזה נקבע רק אחרי השמירה הראשונה.');
+    alert('קודם צריך לשמור את הכתבה (💾 שמור כתבה), ואז לפתוח אותה שוב כדי להוסיף את ' + w.label + '.\n\nהסיבה: לטופס צריך לדעת מספר כתבה, וזה נקבע רק אחרי השמירה הראשונה.');
     return;
   }
-  var asEmbed = confirm('להוסיף את טופס קופות החולים בתוך הכתבה (תמיד גלוי)?\n\n✓ אישור — מוטמע בכתבה\n✗ ביטול — כפופאפ (עם בחירת טריגר)');
+  var src = 'forms/' + encodeURIComponent(w.file);
+  var asEmbed = confirm('להוסיף את ' + w.label + ' בתוך הכתבה (תמיד גלוי)?\n\n✓ אישור — מוטמע בכתבה\n✗ ביטול — כפופאפ (עם בחירת טריגר)');
   if (asEmbed) {
     saveCursor();
     openFormEmbed();
     document.getElementById('form-code-input').value =
-      '<iframe src="forms/kupot_multistep_exact_v14.html?articleId=' + articleId + '&source=embed"></iframe>';
-    document.getElementById('form-height-input').value = 520;
+      '<iframe src="' + src + '?articleId=' + articleId + '&source=embed"></iframe>';
+    document.getElementById('form-height-input').value = w.embedHeight;
   } else {
     saveCursor();
     openPopupEmbed();
     document.getElementById('popup-code-input').value =
-      '<iframe src="forms/kupot_multistep_exact_v14.html?articleId=' + articleId + '&source=popup" style="width:100%;height:100%;border:none;position:absolute;inset:0" scrolling="no"></iframe>';
+      '<iframe src="' + src + '?articleId=' + articleId + '&source=popup" style="width:100%;height:100%;border:none;position:absolute;inset:0" scrolling="no"></iframe>';
   }
 }
 

@@ -270,8 +270,11 @@ body.kb-open .bottom { display:none }
   <div style="font-size:13px;color:var(--muted);font-weight:600">שולח...</div>
 </div>
 
+<!-- Firebase — this widget runs in its own iframe, so it loads its own copy -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
 <script>
-const SHEET   = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
 const TOTAL   = 6;
 const Q_COUNT = 5;
 let cur = 0, busy = false;
@@ -332,14 +335,55 @@ function pick(el,field) {
   setTimeout(()=>next(),380);
 }
 
+// ── SAVE LEAD — Firebase (source of truth) + Manhattan Clinic sheet forward ──
 function submitForm() {
   document.getElementById('loader').classList.add('show');
-  const data = { timestamp:new Date().toLocaleString('he-IL'), name:A.name, age:A.age, lesions:A.lesions, clinic:A.clinic, phone:A.phone };
-  fetch(SHEET,{ method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams(data).toString() })
-  .catch(()=>{})
-  .finally(()=>{
+
+  const params = new URLSearchParams(location.search);
+  const timestamp = new Date().toLocaleString('he-IL');
+  const waLink = 'https://wa.me/972552235439';
+  // ה-iframe עצמו נמצא ב-forms/... — ל-"Source page" רוצים את כתובת
+  // הכתבה עצמה (ההורה), לא את כתובת ה-iframe.
+  let sourcePage = location.href;
+  try { if (window.parent && window.parent !== window) sourcePage = window.parent.location.href; } catch (e) {}
+
+  const leadData = {
+    name: A.name, age: A.age, lesions: A.lesions, clinic: A.clinic, phone: A.phone,
+    timestamp,
+    articleId: params.get('articleId') || '',
+    source: params.get('source') || 'widget'
+  };
+
+  const firebaseSave = (typeof database !== 'undefined')
+    ? database.ref('leads').push(leadData).catch(err => console.error('❌ Firebase lead save failed:', err))
+    : Promise.resolve();
+
+  // קיים על אותו גיליון שכבר בשימוש (Manhattan Clinic leads), משותף עם
+  // הווידג'ט השני (kupot). אין כאן "fund" (לא נאסף בטופס הזה) אז נשאר
+  // ריק; lesions ממופה לעמודת Treatment בהיעדר שדה מתאים יותר.
+  // Fire-and-forget — mode:'no-cors' ממילא לא מאפשר לקרוא את התוצאה.
+  if (typeof database !== 'undefined') {
+    database.ref('settings/manhattanSheetsWebhookUrl').once('value').then(snap => {
+      const url = snap.val();
+      if (!url) return;
+      return fetch(url, { method:'POST', mode:'no-cors', body:new URLSearchParams({
+        Timestamp: timestamp,
+        Name: A.name,
+        WaLink: waLink,
+        FormName: 'israel-magazine-moria-widget',
+        SourcePage: sourcePage,
+        Phone: A.phone,
+        Fund: '',
+        Treatment: A.lesions,
+        Age: A.age,
+        Clinic: A.clinic
+      })});
+    }).catch(err => console.error('❌ Sheets forward failed:', err));
+  }
+
+  firebaseSave.finally(()=>{
     document.getElementById('loader').classList.remove('show');
-    document.getElementById('sName').textContent = data.name;
+    document.getElementById('sName').textContent = A.name;
     goTo(5);
   });
 }
