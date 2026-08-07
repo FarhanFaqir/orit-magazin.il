@@ -10,7 +10,10 @@
 :root{--ink:#0f0f0f;--paper:#f7f5f0;--mid:#6b6560;--line:#e0dbd3;--red:#c8352a;--white:#fff;--green:#2e7d52}
 body{font-family:'Heebo',sans-serif;background:var(--paper);color:var(--ink);direction:rtl;min-height:100vh}
 
-.admin-header{background:var(--ink);color:var(--white);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.admin-header{background:var(--ink);color:var(--white);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:0.6rem}
+.admin-header-links{display:flex;gap:10px;font-size:0.85rem;flex-wrap:wrap}
+.admin-header-links a{color:#aaa;text-decoration:none;white-space:nowrap}
+.admin-header-links a:hover{color:white}
 .admin-logo{font-size:1.2rem;font-weight:900}
         
 .admin-logo span{color:var(--red)}
@@ -97,7 +100,7 @@ textarea{resize:vertical;line-height:1.6}
 
 /* LIST */
 .list-panel{grid-column:2;padding:1.5rem;overflow-y:auto}
-.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;padding-bottom:0.8rem;border-bottom:2px solid var(--ink)}
+.list-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:0.6rem;margin-bottom:1.2rem;padding-bottom:0.8rem;border-bottom:2px solid var(--ink)}
 .list-header h2{font-size:0.95rem;font-weight:700;letter-spacing:1px}
 .list-count{font-size:0.8rem;color:var(--mid)}
 .article-row{background:white;border:1px solid var(--line);padding:0.9rem 1rem;margin-bottom:0.5rem;display:grid;grid-template-columns:60px 1fr auto;gap:0.8rem;align-items:center;transition:border-color 0.2s}
@@ -146,7 +149,15 @@ textarea{resize:vertical;line-height:1.6}
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green);color:white;padding:11px 22px;font-size:0.88rem;font-weight:600;transition:transform 0.4s;z-index:9999;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-@media(max-width:900px){.admin-body{grid-template-columns:1fr}.form-panel{position:static;height:auto;grid-column:1;grid-row:auto}.tools-section{grid-column:1}.list-panel{grid-column:1}}
+@media(max-width:900px){
+  /* מבטל grid לגמרי במובייל — נמנע מכל בעיית מידות track (490px+1fr
+     שלא קורסות נכון) ופשוט מערים את שלושת האזורים אחד מתחת לשני,
+     כל אחד ברוחב מלא, לפי סדר ה-DOM (טופס ← כלים ← רשימה) */
+  .admin-body{display:block}
+  .form-panel{position:static;height:auto;width:100%;grid-column:auto;grid-row:auto}
+  .tools-section{width:100%;grid-column:auto}
+  .list-panel{width:100%;grid-column:auto}
+}
 
   /* TOOLS SECTION */
   .tools-section {
@@ -268,13 +279,13 @@ textarea{resize:vertical;line-height:1.6}
 
 <div class="admin-header">
   <div class="admin-logo">ישראל<span>מגזין</span><small>ממשק ניהול</small></div>
-        <div style="display: flex; gap: 10px; font-size: 0.85rem;">
-          <a href="full-code-editor.html" style="color: #aaa; text-decoration: none;">💻 עורך קוד</a>
-          <a href="code-manager.html" style="color: #aaa; text-decoration: none;">📊 קודים</a>
-          <a href="leads.html" style="color: #aaa; text-decoration: none;">🧲 לידים</a>
-          <a href="newsletter.html" style="color: #aaa; text-decoration: none;">📧 ניוזלטר</a>
-          <a href="style-editor.html" style="color: #aaa; text-decoration: none;">🎨 עיצוב</a>
-          <a href="backup.html" style="color: #aaa; text-decoration: none;">💾 גיבוי</a>
+        <div class="admin-header-links">
+          <a href="full-code-editor.html">💻 עורך קוד</a>
+          <a href="code-manager.html">📊 קודים</a>
+          <a href="leads.html">🧲 לידים</a>
+          <a href="newsletter.html">📧 ניוזלטר</a>
+          <a href="style-editor.html">🎨 עיצוב</a>
+          <a href="backup.html">💾 גיבוי</a>
         </div>
   <a href="../index.html" class="back-link">← חזרה לאתר</a>
 </div>
