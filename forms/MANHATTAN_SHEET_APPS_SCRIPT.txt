@@ -1,0 +1,73 @@
+═════════════════════════════════════════════════════════════════
+📊 Apps Script — kupot widget → Manhattan Clinic leads sheet
+Sheet: 17wWkgIqt4xrfTR4efaZSaSjCVwKpVrJHcqbhL9QKOzw ("SMART FORM - FORMS LEADS")
+═════════════════════════════════════════════════════════════════
+
+This posts kupot-widget submissions into the SAME sheet Orit already
+uses, matching its existing columns exactly. Frontend-only — no
+service-account key involved anywhere, nothing that can leak.
+
+Column mapping used below:
+  A Date & Time   → timestamp
+  B Name          → lead.name
+  C Wa link       → the wa.me link the widget already builds
+  D Status        → left blank (matches how existing rows are filled
+                    in manually, not by the form)
+  E Q1 / F Q2     → left blank (that pair belongs to the older form
+                    type already using this sheet — not touched)
+  G Form name     → "israel-magazine-kupot-widget"
+  H Source page   → the article page the widget was on
+  I Phone number  → lead.phone
+  J Q1            → fund (קופת חולים)         — step 1 of the widget
+  K Q2            → treatment (מה רוצה להסיר)  — step 3
+  L Q3            → age (קבוצת גיל)            — step 4
+  M Q4            → clinic (קליניקה)           — step 5
+
+שלב 1: פתחו את הגיליון הזה (SMART FORM - FORMS LEADS)
+───────────────────────────────────────────────────────
+Tools → Script editor (או Extensions → Apps Script)
+מחקו כל קוד קיים והדביקו את זה:
+
+═════════════════════════════════════════════════════════════════
+
+function doPost(e) {
+  // openById עובד גם אם הסקריפט לא "קשור" ישירות לגיליון (standalone
+  // project) — לא תלוי איך פתחתם את העורך.
+  const sheet = SpreadsheetApp.openById('17wWkgIqt4xrfTR4efaZSaSjCVwKpVrJHcqbhL9QKOzw').getActiveSheet();
+  const data = e.parameter;
+
+  sheet.appendRow([
+    data['Timestamp']   || new Date().toLocaleString('he-IL'), // A
+    data['Name']        || '',                                  // B
+    data['WaLink']       || '',                                 // C
+    '',                                                          // D Status
+    '',                                                          // E Q1 (legacy)
+    '',                                                          // F Q2 (legacy)
+    data['FormName']    || '',                                  // G
+    data['SourcePage']  || '',                                  // H
+    data['Phone']       || '',                                  // I
+    data['Fund']        || '',                                  // J Q1
+    data['Treatment']   || '',                                  // K Q2
+    data['Age']         || '',                                  // L Q3
+    data['Clinic']       || ''                                  // M Q4
+  ]);
+
+  return ContentService.createTextOutput('OK');
+}
+
+═════════════════════════════════════════════════════════════════
+
+שלב 2: Deploy
+───────────────
+Deploy → New deployment → Web app
+  Execute as: Me
+  Who has access: Anyone
+Deploy → Copy את ה-URL
+
+שלב 3: תנו לי את ה-URL
+─────────────────────────
+שלחו לי אותו ואני אשמור אותו ב-Firebase תחת
+/settings/kupotSheetsWebhookUrl — נפרד לגמרי מה-Sheets webhook
+הרגיל (כדי לא לערבב בין הפורמט של הטופס הכללי לפורמט הזה).
+
+═════════════════════════════════════════════════════════════════
