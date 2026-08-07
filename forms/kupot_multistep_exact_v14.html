@@ -176,22 +176,43 @@ document.querySelector('.submit').onclick=()=>{
 };
 phone.addEventListener('input',()=>{phone.classList.remove('invalid');phoneError.classList.remove('show')});
 
-// ── SAVE LEAD — Firebase (source of truth) + Google Sheets forward ──
+// ── SAVE LEAD — Firebase (source of truth) + Manhattan Clinic sheet forward ──
 // Fire-and-forget: never blocks the success screen / WhatsApp button above.
 function saveLead(lead){
   const params=new URLSearchParams(location.search);
+  const timestamp=new Date().toLocaleString('he-IL');
+  const waLink=document.getElementById('whatsappLink').href;
+  // ה-iframe עצמו נמצא ב-forms/kupot_...html — לצורך "Source page" רוצים
+  // את כתובת הכתבה עצמה (ההורה), לא את כתובת ה-iframe.
+  let sourcePage=location.href;
+  try{ if(window.parent && window.parent!==window) sourcePage=window.parent.location.href; }catch(e){}
+
   const leadData={
     ...lead,
-    timestamp:new Date().toLocaleString('he-IL'),
+    timestamp,
     articleId:params.get('articleId')||'',
     source:params.get('source')||'widget'
   };
   if(typeof database==='undefined'){console.error('❌ Firebase not loaded — lead not saved');return}
   database.ref('leads').push(leadData).catch(err=>console.error('❌ Firebase lead save failed:',err));
-  database.ref('settings/sheetsWebhookUrl').once('value').then(snap=>{
+
+  // קיים על אותו גיליון שכבר בשימוש (Manhattan Clinic leads) — עמודות J-M
+  // (Q1-Q4) ממופות ל-fund/treatment/age/clinic, בדיוק לפי סדר השלבים בטופס.
+  database.ref('settings/kupotSheetsWebhookUrl').once('value').then(snap=>{
     const url=snap.val();
     if(!url)return;
-    return fetch(url,{method:'POST',mode:'no-cors',body:new URLSearchParams(leadData)});
+    return fetch(url,{method:'POST',mode:'no-cors',body:new URLSearchParams({
+      Timestamp: timestamp,
+      Name: lead.name,
+      WaLink: waLink,
+      FormName: 'israel-magazine-kupot-widget',
+      SourcePage: sourcePage,
+      Phone: lead.phone,
+      Fund: lead.fund,
+      Treatment: lead.treatment,
+      Age: lead.age,
+      Clinic: lead.clinic
+    })});
   }).catch(err=>console.error('❌ Sheets forward failed:',err));
 }
 </script>
