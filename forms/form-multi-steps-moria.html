@@ -26,7 +26,7 @@ html,body { height:100%; overflow:hidden; font-family:'Assistant',sans-serif; ba
 
 .viewport { position:fixed;inset:0;overflow:hidden }
 
-.card { position:absolute;inset:0; display:flex;flex-direction:column; align-items:center;justify-content:center; padding:28px 24px 88px; opacity:0;transform:translateY(40px) scale(.99); transition:opacity .5s var(--ease),transform .5s var(--ease); pointer-events:none; will-change:transform,opacity; }
+.card { position:absolute;inset:0; display:flex;flex-direction:column; align-items:center;justify-content:center; padding:28px 24px 88px; opacity:0;transform:translateY(40px) scale(.99); transition:opacity .5s var(--ease),transform .5s var(--ease); pointer-events:none; will-change:transform,opacity; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .card.active { opacity:1;transform:translateY(0) scale(1);pointer-events:all }
 .card.exit   { opacity:0;transform:translateY(-26px) scale(.99);pointer-events:none }
 
