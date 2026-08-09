@@ -136,5 +136,14 @@ function closeDrawer() {
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
 </script>
+
+<!-- Firebase (needed to read /settings/codes for the thank-you-page pixel) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<!-- Code Injector — also fires the general site-wide codes (GTM/GA/etc)
+     here like any real page view, plus the thank-you-only conversion
+     pixel set in the admin panel -->
+<script src="js/code-injector.js"></script>
 </body>
 </html>

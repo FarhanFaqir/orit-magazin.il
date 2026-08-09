@@ -382,8 +382,29 @@
         <button class="delete" onclick="deleteCode('custom')">🗑️ מחק</button>
       </div>
     </div>
+
+    <!-- THANK YOU PAGE CODE — fires ONLY on thank-you.html, not on every article -->
+    <div class="code-section" style="border: 2px solid #ffc107; background: #fffdf5;">
+      <h2>🎯 קוד לעמוד תודה (פיקסל המרה)</h2>
+      <span class="subtitle">רץ רק בעמוד התודה אחרי שליחת טופס — לא בכל הכתבות</span>
+
+      <div id="thankYouMessage" class="message"></div>
+
+      <div class="form-group">
+        <label>קוד המרה (Facebook Lead event / Google Ads conversion וכו')</label>
+        <textarea id="thankYouCode" placeholder="<script>...</script>"></textarea>
+        <div class="code-id">מתאים לאירועי המרה שצריכים לספור פעם אחת, בדיוק כשליד נשלח — לא בכל טעינת עמוד</div>
+      </div>
+
+      <div class="code-status" id="thankYouStatus"></div>
+
+      <div class="button-group">
+        <button onclick="saveCode('thankYou')">💾 שמור קוד</button>
+        <button class="delete" onclick="deleteCode('thankYou')">🗑️ מחק</button>
+      </div>
+    </div>
   </div>
-  
+
   <a href="/" class="test-link">👈 חזור לעמוד הבית</a>
 </div>
 
@@ -400,7 +421,8 @@ const CODES = {
   hj: { name: 'Hotjar', type: 'hj-id' },
   tb: { name: 'Taboola', type: 'custom-js' },
   ob: { name: 'Outbrain', type: 'custom-js' },
-  custom: { name: 'Custom Code', type: 'custom-js' }
+  custom: { name: 'Custom Code', type: 'custom-js' },
+  thankYou: { name: 'Thank You Page Pixel', type: 'custom-js' }
 };
 
 let codesCache = {};

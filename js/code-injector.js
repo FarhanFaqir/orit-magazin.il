@@ -16,6 +16,20 @@ function injectSavedCodes() {
     if (codes.tb)     injectCustomCode(codes.tb);
     if (codes.ob)     injectCustomCode(codes.ob);
     if (codes.custom) injectCustomCode(codes.custom);
+    // קוד המרה ייעודי לעמוד תודה (Facebook Lead event / Google Ads
+    // conversion וכו') — צריך לרוץ פעם אחת, רק כשליד באמת נשלח, לא בכל
+    // ביקור ישיר/רענון/שיתוף של הקישור. הטופס מסמן דגל חד-פעמי ב-
+    // sessionStorage ממש לפני ההפניה; אם הדגל לא קיים, זו לא המרה
+    // אמיתית ולא מזריקים את הפיקסל. הדגל מוסר מיד אחרי הבדיקה כדי
+    // שרענון של העמוד לא יירה שוב.
+    if (codes.thankYou && /(^|\/)thank-you\.html$/.test(location.pathname)) {
+      var isRealConversion = false;
+      try { isRealConversion = sessionStorage.getItem('pulsar_conversion_pending') === '1'; } catch (e) {}
+      if (isRealConversion) {
+        try { sessionStorage.removeItem('pulsar_conversion_pending'); } catch (e) {}
+        injectCustomCode(codes.thankYou);
+      }
+    }
   }).catch(err => console.error('❌ Failed to load tracking codes:', err));
 }
 
@@ -31,7 +45,8 @@ function getStoredCodes() {
     hj: localStorage.getItem('code_hj'),
     tb: localStorage.getItem('code_tb'),
     ob: localStorage.getItem('code_ob'),
-    custom: localStorage.getItem('code_custom')
+    custom: localStorage.getItem('code_custom'),
+    thankYou: localStorage.getItem('code_thankYou')
   });
 }
 
