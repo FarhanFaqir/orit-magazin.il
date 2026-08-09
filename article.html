@@ -13,19 +13,6 @@
     margin: 0 auto;
     padding: 3rem 5vw 4rem;
   }
-  .article-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--mid);
-    text-decoration: none;
-    margin-bottom: 2rem;
-    transition: color 0.2s;
-  }
-  .article-back:hover { color: var(--red); }
-
   .article-cat {
     font-size: 0.72rem;
     font-weight: 700;
@@ -200,7 +187,6 @@ function renderArticleContent(article) {
   if (isFirstRender) {
     document.getElementById('article-output').innerHTML = `
       <div class="article-wrap">
-        ${IS_PREVIEW ? '' : '<a href="index.html" class="article-back">→ חזרה לעמוד הבית</a>'}
         <div class="article-cat" id="pv-cat"></div>
         <h1 class="article-title" id="pv-title"></h1>
         <div class="article-meta">

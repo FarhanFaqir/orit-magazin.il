@@ -167,21 +167,36 @@ document.querySelector('.submit').onclick=()=>{
     'טלפון: '+lead.phone
   ].join('\n');
 
-  document.getElementById('whatsappLink').href=
-    'https://wa.me/972552235439?text='+encodeURIComponent(whatsappMessage);
+  const waLink='https://wa.me/972552235439?text='+encodeURIComponent(whatsappMessage);
+  document.getElementById('whatsappLink').href=waLink;
 
   console.log('Lead',lead);
-  saveLead(lead);
-  show(6);
+  show(6); // משוב מיידי, בזמן שהשמירה+הפניה מתבצעות ברקע
+  saveLead(lead).finally(()=>{
+    // יציאה מה-iframe (מוטמע/פופאפ) לעמוד תודה מלא — window.top גם
+    // עובד תקין אם הווידג'ט נפתח ישירות (לא בתוך iframe).
+    var thankUrl='../thank-you.html?name='+encodeURIComponent(lead.name||'')+'&form=kupot&wa='+encodeURIComponent(waLink);
+    try{ (window.top||window).location.href=thankUrl; }catch(e){ location.href=thankUrl; }
+  });
 };
 phone.addEventListener('input',()=>{phone.classList.remove('invalid');phoneError.classList.remove('show')});
 
+// בונה קישור wa.me נקי (בלי הודעה מוכנה מראש) לעמודת "Wa link" בגיליון —
+// הקישור העשיר (עם הטקסט) מיועד לכפתור שהגולש/ת עצמם לוחצים עליו, לא
+// לתא בגיליון שאמור להיות קצר וקריא.
+function buildCleanWaLink(phone){
+  const d=(phone||'').replace(/[^\d]/g,'');
+  const intl = d.replace(/^0/,'972'); // מקומי (05...) -> בינלאומי (9725...)
+  return 'https://wa.me/'+intl;
+}
+
 // ── SAVE LEAD — Firebase (source of truth) + Manhattan Clinic sheet forward ──
-// Fire-and-forget: never blocks the success screen / WhatsApp button above.
+// מחזיר Promise שנפתר אחרי שמירת Firebase (או אחרי 1.5 שניות לכל היותר,
+// כדי שלא נתקע לנצח על רשת איטית) — הקוד שקורא לפונקציה מפנה לעמוד תודה
+// רק אחרי זה, כדי לא לנווט מהעמוד לפני שהליד באמת נשמר.
 function saveLead(lead){
   const params=new URLSearchParams(location.search);
   const timestamp=new Date().toLocaleString('he-IL');
-  const waLink=document.getElementById('whatsappLink').href;
   // ה-iframe עצמו נמצא ב-forms/kupot_...html — לצורך "Source page" רוצים
   // את כתובת הכתבה עצמה (ההורה), לא את כתובת ה-iframe.
   let sourcePage=location.href;
@@ -193,8 +208,8 @@ function saveLead(lead){
     articleId:params.get('articleId')||'',
     source:params.get('source')||'widget'
   };
-  if(typeof database==='undefined'){console.error('❌ Firebase not loaded — lead not saved');return}
-  database.ref('leads').push(leadData).catch(err=>console.error('❌ Firebase lead save failed:',err));
+  if(typeof database==='undefined'){console.error('❌ Firebase not loaded — lead not saved');return Promise.resolve()}
+  const firebaseSave=database.ref('leads').push(leadData).catch(err=>console.error('❌ Firebase lead save failed:',err));
 
   // קיים על אותו גיליון שכבר בשימוש (Manhattan Clinic leads) — עמודות J-M
   // (Q1-Q4) ממופות ל-fund/treatment/age/clinic, בדיוק לפי סדר השלבים בטופס.
@@ -204,7 +219,7 @@ function saveLead(lead){
     return fetch(url,{method:'POST',mode:'no-cors',body:new URLSearchParams({
       Timestamp: timestamp,
       Name: lead.name,
-      WaLink: waLink,
+      WaLink: buildCleanWaLink(lead.phone),
       FormName: 'israel-magazine-kupot-widget',
       SourcePage: sourcePage,
       Phone: lead.phone,
@@ -214,6 +229,8 @@ function saveLead(lead){
       Clinic: lead.clinic
     })});
   }).catch(err=>console.error('❌ Sheets forward failed:',err));
+
+  return Promise.race([firebaseSave, new Promise(res=>setTimeout(res,1500))]);
 }
 </script>
 

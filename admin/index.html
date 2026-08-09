@@ -922,8 +922,8 @@ async function saveArticle() {
   var image    = document.getElementById('f-image').value;
   var emoji    = document.getElementById('f-emoji').value || '📝';
 
-  if (!title || !cat || !excerpt || !content.replace(/<[^>]*>/g,'').trim()) {
-    alert('נא למלא: כותרת, קטגוריה, תקציר ותוכן'); return;
+  if (!title || !cat || !content.replace(/<[^>]*>/g,'').trim()) {
+    alert('נא למלא: כותרת, קטגוריה ותוכן'); return;
   }
   var data = { title:title, category:cat, emoji:emoji, image:image, excerpt:excerpt, content:content, date:date, readTime:readTime, featured:featured };
   try {
