@@ -411,6 +411,10 @@ function submitForm() {
   Promise.race([firebaseSave, new Promise(res => setTimeout(res, 1500))]).finally(() => {
     // יציאה מה-iframe (מוטמע/פופאפ) לעמוד תודה מלא
     var thankUrl = '../thank-you.html?name=' + encodeURIComponent(A.name || '') + '&form=moria&wa=' + encodeURIComponent(waLink);
+    // דגל חד-פעמי — מאפשר ל-thank-you.html להבחין בין מי שבאמת עכשיו
+    // השלים טופס לבין ביקור ישיר/רענון/שיתוף קישור, כדי שפיקסל ההמרה
+    // לא יירה על מי שסתם נכנס לעמוד.
+    try { sessionStorage.setItem('pulsar_conversion_pending', '1'); } catch (e) {}
     try { (window.top || window).location.href = thankUrl; } catch (e) { location.href = thankUrl; }
   });
 }
