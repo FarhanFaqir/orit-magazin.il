@@ -175,7 +175,8 @@ document.querySelector('.submit').onclick=()=>{
   saveLead(lead).finally(()=>{
     // יציאה מה-iframe (מוטמע/פופאפ) לעמוד תודה מלא — window.top גם
     // עובד תקין אם הווידג'ט נפתח ישירות (לא בתוך iframe).
-    var thankUrl='../thank-you.html?name='+encodeURIComponent(lead.name||'')+'&form=kupot&wa='+encodeURIComponent(waLink);
+    var articleId=new URLSearchParams(location.search).get('articleId')||'';
+    var thankUrl='../thank-you.html?name='+encodeURIComponent(lead.name||'')+'&form=kupot&wa='+encodeURIComponent(waLink)+'&articleId='+encodeURIComponent(articleId);
     // דגל חד-פעמי — מאפשר ל-thank-you.html להבחין בין מי שבאמת עכשיו
     // השלים טופס לבין ביקור ישיר/רענון/שיתוף קישור, כדי שפיקסל ההמרה
     // לא יירה על מי שסתם נכנס לעמוד.

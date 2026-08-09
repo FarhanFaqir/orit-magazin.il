@@ -410,7 +410,7 @@ function submitForm() {
   // לא נתקע לנצח על רשת איטית — ממשיכים אחרי מקסימום 1.5 שניות בכל מקרה
   Promise.race([firebaseSave, new Promise(res => setTimeout(res, 1500))]).finally(() => {
     // יציאה מה-iframe (מוטמע/פופאפ) לעמוד תודה מלא
-    var thankUrl = '../thank-you.html?name=' + encodeURIComponent(A.name || '') + '&form=moria&wa=' + encodeURIComponent(waLink);
+    var thankUrl = '../thank-you.html?name=' + encodeURIComponent(A.name || '') + '&form=moria&wa=' + encodeURIComponent(waLink) + '&articleId=' + encodeURIComponent(params.get('articleId') || '');
     // דגל חד-פעמי — מאפשר ל-thank-you.html להבחין בין מי שבאמת עכשיו
     // השלים טופס לבין ביקור ישיר/רענון/שיתוף קישור, כדי שפיקסל ההמרה
     // לא יירה על מי שסתם נכנס לעמוד.
