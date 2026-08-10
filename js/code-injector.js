@@ -143,9 +143,12 @@ function injectCustomCode(code) {
       const scripts = container.querySelectorAll('script');
       scripts.forEach(script => {
         const newScript = document.createElement('script');
-        newScript.textContent = script.textContent;
-        newScript.src = script.src;
-        newScript.async = script.async;
+        if (script.hasAttribute('src')) {
+          newScript.src = script.src;
+          newScript.async = script.async;
+        } else {
+          newScript.textContent = script.textContent;
+        }
         document.head.appendChild(newScript);
       });
       
