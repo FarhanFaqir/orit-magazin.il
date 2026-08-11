@@ -7,14 +7,20 @@ function injectSavedCodes() {
   // אל תפעיל פיקסלים/אנליטיקס אמיתיים בתוך ה-iframe של תצוגה מקדימה חיה
   // בעורך — זו לא צפייה אמיתית של מבקר.
   if (new URLSearchParams(location.search).get('preview') === '1') return;
+  // עמוד התודה מכיל כבר ישירות בקוד המקור (hardcoded) את Taboola/Outbrain
+  // (כולל אירוע ה-Lead) ואת GTM-NG7D3XQG — לא דרך המערכת הדינמית הזו —
+  // כדי ש-Tag Assistant וכלי בדיקה דומים יזהו אותם בביקור רגיל, בלי צורך
+  // בהמרה אמיתית. לכן מדלגים כאן על tb/ob בעמוד הזה, אחרת הם היו יורים
+  // פעמיים (גם ישירות מהקוד, וגם דרך ההזרקה הכללית פה).
+  var isThankYouPage = /(^|\/)thank-you\.html$/.test(location.pathname);
   getStoredCodes().then(codes => {
     if (!codes) return;
     if (codes.gtm)    injectGTM(codes.gtm);
     if (codes.fb)     injectFacebookPixel(codes.fb);
     if (codes.ga)     injectGA4(codes.ga);
     if (codes.hj)     injectHotjar(codes.hj);
-    if (codes.tb)     injectCustomCode(codes.tb);
-    if (codes.ob)     injectCustomCode(codes.ob);
+    if (codes.tb && !isThankYouPage) injectCustomCode(codes.tb);
+    if (codes.ob && !isThankYouPage) injectCustomCode(codes.ob);
     if (codes.custom) injectCustomCode(codes.custom);
     // קוד המרה ייעודי לעמוד תודה (Facebook Lead event / Google Ads
     // conversion וכו') — צריך לרוץ פעם אחת, רק כשליד באמת נשלח, לא בכל
@@ -52,20 +58,20 @@ function getStoredCodes() {
 
 // ── INJECT GTM ──
 function injectGTM(gtmId) {
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${gtmId}`;
-  document.head.appendChild(script);
-  
+  // gtag/js?id= (הישן שהיה כאן) הוא הטוען הנכון ל-GA4/Google Ads
+  // (מזהים G-.../AW-...), לא לקונטיינר GTM אמיתי (GTM-...) — קונטיינר
+  // צריך את loader gtm.js הספציפי הזה כדי שהטאגים/הטריגרים שהוגדרו בו
+  // בפועל ירוצו.
   const scriptInline = document.createElement('script');
   scriptInline.textContent = `
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', '${gtmId}');
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','${gtmId}');
   `;
   document.head.appendChild(scriptInline);
-  
+
   console.log('✅ GTM injected:', gtmId);
 }
 
