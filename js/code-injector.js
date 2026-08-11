@@ -143,12 +143,13 @@ function injectCustomCode(code) {
       const scripts = container.querySelectorAll('script');
       scripts.forEach(script => {
         const newScript = document.createElement('script');
-        if (script.hasAttribute('src')) {
-          newScript.src = script.src;
-          newScript.async = script.async;
-        } else {
-          newScript.textContent = script.textContent;
-        }
+        // מעתיקים את כל האטריביוטים כמו שהם (data-obct וכו') — קריטי
+        // לחלק מהספקים (למשל Outbrain, שכלי הבדיקה שלהם מזהים את
+        // הפיקסל דרך data-obct). מעתיקים src רק אם היה בקוד המקורי —
+        // הגדרת src="" על סקריפט בלי src גורמת לדפדפן להתייחס אליו
+        // כחיצוני ולהתעלם מהתוכן המוטבע (script.src ריק כברירת מחדל).
+        for (const attr of script.attributes) newScript.setAttribute(attr.name, attr.value);
+        if (!script.hasAttribute('src')) newScript.textContent = script.textContent;
         document.head.appendChild(newScript);
       });
       
