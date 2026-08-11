@@ -8,7 +8,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:transparent;height:100%}
 body{font-family:Arial,"Heebo",sans-serif;color:#111;min-height:100vh;display:flex;align-items:center;justify-content:center}
-.widget{width:100%;max-width:320px;margin:0 auto;padding:0 6px}
+.widget{width:100%;max-width:320px;margin:0 auto;padding:60px 6px}
 .stage{height:378px;position:relative;overflow:hidden}
 .step{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transform:translateX(-18px);transition:.28s ease}
 .step.active{opacity:1;visibility:visible;transform:translateX(0)}
@@ -58,7 +58,7 @@ input.invalid{border-color:#d33}
 .success h2{margin:0 0 8px;font-size:22px}
 .success p{margin:0 0 18px;font-size:15px;color:#666}
 .whatsapp{display:flex;align-items:center;justify-content:center;width:min(82vw,290px);height:50px;border-radius:14px;background:#25d366;color:#fff;text-decoration:none;font-size:15px;font-weight:900}
-@media(max-width:380px){.widget{max-width:300px;padding:0 4px}.stage{height:372px}.title{font-size:21px;line-height:1.28;margin:2px auto 18px;padding-bottom:16px}.kupa{width:min(69vw,220px)}.logo-list{gap:6px}.question{font-size:20px;margin-top:12px}.selected-logo{width:198px;min-height:55px}}
+@media(max-width:380px){.widget{max-width:300px;padding:60px 4px}.stage{height:372px}.title{font-size:21px;line-height:1.28;margin:2px auto 18px;padding-bottom:16px}.kupa{width:min(69vw,220px)}.logo-list{gap:6px}.question{font-size:20px;margin-top:12px}.selected-logo{width:198px;min-height:55px}}
 </style>
 </head>
 <body>
@@ -255,9 +255,18 @@ function saveLead(lead){
 
 <script>
 function sendWidgetHeight(){
-  const h=document.documentElement.scrollHeight;
+  // לא מודדים document.documentElement.scrollHeight — body הוא
+  // min-height:100vh, אז זה תמיד משקף לפחות את הגובה הנוכחי של
+  // האייפריים (בדיוק כמו הבאג שהיה ב-.card של מוריה). זה יוצר לולאה:
+  // דיווח → ההורה מגדיל את הקופסה → זה מפעיל 'resize' כאן → מודדים
+  // שוב ומקבלים את הגודל שכבר נקבע → מוסיפים את ה-buffer שוב וחוזר
+  // חלילה, עד שנתקע בתקרה הקשיחה ב-article.html. .widget לעומת זאת
+  // הוא אלמנט רגיל בזרימה — body רק ממרכז אותו, לא מותח אותו — אז
+  // הגובה שלו תמיד משקף את התוכן האמיתי, בלי תלות בגודל הקופסה הנוכחי.
+  const w=document.querySelector('.widget');
+  const h=w?Math.ceil(w.getBoundingClientRect().height):document.documentElement.scrollHeight;
   if(window.parent!==window.parent.parent || window.parent!==window){
-    window.parent.postMessage({type:'kupot-widget-height',height:h},'*');
+    window.parent.postMessage({type:'kupot-widget-height',height:h+12},'*');
   }
 }
 window.addEventListener('load',sendWidgetHeight);
