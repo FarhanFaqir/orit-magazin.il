@@ -206,6 +206,20 @@ function saveLead(lead){
   // את כתובת הכתבה עצמה (ההורה), לא את כתובת ה-iframe.
   let sourcePage=location.href;
   try{ if(window.parent && window.parent!==window) sourcePage=window.parent.location.href; }catch(e){}
+  // אותו קובץ טופס מוטמע בכמה אתרי לקוח שונים (magazin-il, manhattan-clinic
+  // וכו') אבל כולם מפנים לאותו גיליון משותף — בלי זה כל השורות היו נראות
+  // זהות ואי אפשר היה לדעת מאיזה אתר הגיע כל ליד.
+  let siteHost='';
+  try{ siteHost=new URL(sourcePage).hostname.replace(/^www\./,''); }catch(e){}
+  // מאיזו פלטפורמת פרסום הגיע הליד — Google/Facebook/TikTok מוסיפים את
+  // gclid/fbclid/ttclid לכתובת אוטומטית בעצמם. Taboola/Outbrain אין להם
+  // פרמטר קבוע כזה, אז זה עובד רק אם הקמפיין שם מוגדר עם
+  // utm_source=taboola / utm_source=outbrain בכתובת היעד.
+  let adSource='';
+  try{
+    const sp=new URL(sourcePage).searchParams;
+    adSource = sp.get('utm_source') || (sp.get('gclid')?'google':'') || (sp.get('fbclid')?'facebook':'') || (sp.get('ttclid')?'tiktok':'') || '';
+  }catch(e){}
 
   const leadData={
     ...lead,
@@ -225,7 +239,7 @@ function saveLead(lead){
       Timestamp: timestamp,
       Name: lead.name,
       WaLink: buildCleanWaLink(lead.phone),
-      FormName: 'israel-magazine-kupot-widget',
+      FormName: (siteHost ? siteHost+' - ' : '')+(adSource ? adSource+' - ' : '')+'kupot-widget',
       SourcePage: sourcePage,
       Phone: lead.phone,
       Fund: lead.fund,
@@ -249,6 +263,12 @@ function sendWidgetHeight(){
 window.addEventListener('load',sendWidgetHeight);
 window.addEventListener('resize',sendWidgetHeight);
 setTimeout(sendWidgetHeight,250);
+// בפופאפ, ה-iframe יושב ב-overlay שמתחיל display:none אצל ההורה — מדידה
+// בזמן שהוא מוסתר לא אמינה. ResizeObserver תופס את הרגע שבו ההורה עובר
+// ל-display:flex (הגודל של ה-iframe עצמו משתנה) ומודד מיד אז.
+if (window.ResizeObserver) {
+  new ResizeObserver(sendWidgetHeight).observe(document.documentElement);
+}
 </script>
 
 </body>

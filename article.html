@@ -307,6 +307,33 @@ function handleSubscribe() {
   document.getElementById('email-input').value = '';
 }
 
+// ── WIDGET AUTO-HEIGHT ──
+// ווידג'טים מוטמעים (קופות/מוריה) מודדים כמה גובה הם באמת צריכים ומדווחים
+// עם postMessage — כדי שהקופסה תמיד תתאים בדיוק לתוכן, בלי גלילה פנימית
+// מיותרת ובלי לחתוך תוכן.
+// הטמעה בכתבה: אין תקרה — הכתבה עצמה יכולה פשוט להיות גבוהה יותר, אז
+// האייפריים גדל בדיוק לגובה שדווח.
+// פופאפ: זה מודאל שחייב להישאר בתוך המסך הנראה, אז הקופסה גדלה עד לתוכן
+// אך אף פעם לא מעבר ל-92vh — אם תוכן ספציפי גבוה מהמסך, גלילה פנימית שם
+// היא ברירת מחדל נכונה (התנהגות רגילה למודאל), לא באג.
+window.addEventListener('message', function (e) {
+  if (!e.data || (e.data.type !== 'kupot-widget-height' && e.data.type !== 'moria-widget-height')) return;
+  const h = Math.max(300, Math.min(Math.round(e.data.height), 1600));
+  const iframes = document.querySelectorAll('.embedded-form-block iframe, .embedded-popup-block iframe');
+  for (const f of iframes) {
+    if (f.contentWindow !== e.source) continue;
+    const popupBox = f.closest('.embedded-popup-block') ? f.parentElement : null;
+    if (popupBox) {
+      popupBox.style.height = 'min(' + h + 'px, 92vh)';
+    } else {
+      f.style.transition = 'height .25s ease'; // הגובה משתנה בכל מעבר שלב — בלי זה זה קופץ בפתאומיות
+      f.style.height = h + 'px';
+      f.style.minHeight = h + 'px';
+    }
+    break;
+  }
+});
+
 init();
 </script>
 

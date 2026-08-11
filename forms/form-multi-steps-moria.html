@@ -301,6 +301,7 @@ function goTo(idx) {
     document.getElementById('card-'+prev).classList.remove('exit');
     to.classList.add('active');
     updateUI(); autoFocus(); busy = false;
+    if (window.__moriaReportHeight) window.__moriaReportHeight();
   }, 80);
 }
 
@@ -368,6 +369,20 @@ function submitForm() {
   // הכתבה עצמה (ההורה), לא את כתובת ה-iframe.
   let sourcePage = location.href;
   try { if (window.parent && window.parent !== window) sourcePage = window.parent.location.href; } catch (e) {}
+  // אותו קובץ טופס מוטמע בכמה אתרי לקוח שונים (magazin-il, manhattan-clinic
+  // וכו') אבל כולם מפנים לאותו גיליון משותף — בלי זה כל השורות היו נראות
+  // זהות ואי אפשר היה לדעת מאיזה אתר הגיע כל ליד.
+  let siteHost = '';
+  try { siteHost = new URL(sourcePage).hostname.replace(/^www\./, ''); } catch (e) {}
+  // מאיזו פלטפורמת פרסום הגיע הליד — Google/Facebook/TikTok מוסיפים את
+  // gclid/fbclid/ttclid לכתובת אוטומטית בעצמם. Taboola/Outbrain אין להם
+  // פרמטר קבוע כזה, אז זה עובד רק אם הקמפיין שם מוגדר עם
+  // utm_source=taboola / utm_source=outbrain בכתובת היעד.
+  let adSource = '';
+  try {
+    const sp = new URL(sourcePage).searchParams;
+    adSource = sp.get('utm_source') || (sp.get('gclid')?'google':'') || (sp.get('fbclid')?'facebook':'') || (sp.get('ttclid')?'tiktok':'') || '';
+  } catch (e) {}
 
   const leadData = {
     name: A.name, age: A.age, lesions: A.lesions, clinic: A.clinic, phone: A.phone,
@@ -392,7 +407,7 @@ function submitForm() {
         Timestamp: timestamp,
         Name: A.name,
         WaLink: buildCleanWaLink(A.phone),
-        FormName: 'israel-magazine-moria-widget',
+        FormName: (siteHost ? siteHost+' - ' : '')+(adSource ? adSource+' - ' : '')+'moria-widget',
         SourcePage: sourcePage,
         Phone: A.phone,
         Fund: '',
@@ -483,6 +498,57 @@ buildDots(); updateUI(); autoFocus();
   else window.addEventListener('resize',onVP);
   document.addEventListener('focusin', e=>{ if(e.target.tagName==='INPUT') setTimeout(onVP,350); });
   document.addEventListener('focusout',e=>{ if(e.target.tagName==='INPUT') setTimeout(onVP,100); });
+})();
+
+// ── AUTO-HEIGHT REPORT ──
+// כל השלבים (.card) קיימים בו-זמנית ב-DOM (position:absolute;inset:0),
+// אז אפשר למדוד את ה-scrollHeight האמיתי של כל אחד בלי לעבור אליו —
+// scrollHeight על אלמנט עם overflow-y:auto תמיד משקף את גובה התוכן
+// המלא, גם כשהוא גדול מהקופסה שניתנה לו.
+// בהטמעה בכתבה (embed): מדווחים את גובה השלב הפעיל *בלבד* ומעדכנים
+// בכל מעבר שלב (ראו הקריאה מ-goTo) — כדי שהאייפריים יתאים בדיוק לתוכן
+// הנוכחי, בלי ריווח ריק מיותר מעל/מתחת לשלבים קצרים יותר.
+// בפופאפ: מדווחים גובה אחד יציב שמכיל את כל השלבים ביחד, כדי שהמודל לא
+// "יקפוץ" בגודל בכל מעבר שלב — יציבות חשובה יותר שם מהתאמה מדויקת.
+(function(){
+  const params = new URLSearchParams(location.search);
+  const src = params.get('source');
+  if (src !== 'embed' && src !== 'popup') return; // בהרצה עצמאית (בדיקה ישירה) אין הורה שמקשיב, אין טעם
+  function reportHeight(){
+    // .card עצמו הוא position:absolute;inset:0 — הוא תמיד ממלא בדיוק את
+    // הגובה שכבר יש לאייפריים, אז ה-scrollHeight שלו לעולם לא יכול לדווח
+    // פחות מהגובה הנוכחי (רק יותר, אם התוכן עוד יותר גבוה). כדי לקבל את
+    // הגובה האמיתי של התוכן — כולל התכווצות — מודדים את ה-.inner, שהוא
+    // ילד רגיל בזרימה הטבעית של ה-flex, לא נמתח למלא את הקופסה.
+    // .inner לא כולל את ה-padding האנכי של .card עצמו (מקום נשימה +
+    // מרווח מעל סרגל הניווט הקבוע בתחתית) — צריך להחזיר אותו בחזרה.
+    function innerPlusPadding(card){
+      const inner = card.querySelector('.inner');
+      if (!inner) return 0;
+      const cs = getComputedStyle(card);
+      return inner.getBoundingClientRect().height + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    }
+    let h = 0;
+    if (src === 'embed') {
+      const active = document.querySelector('.card.active');
+      h = active ? innerPlusPadding(active) : 0;
+    } else {
+      document.querySelectorAll('.card').forEach(c => { h = Math.max(h, innerPlusPadding(c)); });
+    }
+    if (h) window.parent.postMessage({type:'moria-widget-height', height: Math.ceil(h) + 12}, '*');
+  }
+  window.addEventListener('load', reportHeight);
+  setTimeout(reportHeight, 300);
+  setTimeout(reportHeight, 1200); // תמונת האווטאר/פונטים עלולים להיטען מאוחר ולשנות גובה
+  // בפופאפ, ה-<iframe> יושב בתוך overlay שמתחיל display:none אצל ההורה —
+  // בזמן שהוא מוסתר, כל מדידה כאן נותנת 0 (אין layout בכלל), אז המדידות
+  // למעלה פשוט לא שולחות כלום. ResizeObserver על document שלנו תופס את
+  // הרגע שבו ההורה עובר ל-display:flex (האייפריים פתאום מקבל גודל אמיתי
+  // במקום 0) ומודד מיד — כך שהפופאפ מקבל גובה נכון גם בפתיחה הראשונה.
+  if (window.ResizeObserver) {
+    new ResizeObserver(reportHeight).observe(document.documentElement);
+  }
+  window.__moriaReportHeight = reportHeight; // goTo() קורא לזה אחרי כל מעבר שלב (הטמעה בלבד)
 })();
 </script>
 </body>
