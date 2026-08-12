@@ -461,6 +461,7 @@ textarea{resize:vertical;line-height:1.6}
         <button type="button" class="tb-btn" style="background:var(--red);color:white;border-color:var(--red)" onclick="saveCursor();openPopupEmbed()">🪟 פופאפ</button>
         <button type="button" class="tb-btn" style="background:#9b7ef0;color:white;border-color:#9b7ef0" onclick="quickInsertKupotWidget()" title="מוסיף את טופס בדיקת ההתאמה (קופות חולים) בלי צורך בקוד">🏥 טופס קופות</button>
         <button type="button" class="tb-btn" style="background:#e8762a;color:white;border-color:#e8762a" onclick="quickInsertMoriaWidget()" title="מוסיף את טופס מוריה (גיל/נגעים/קליניקה) בלי צורך בקוד">🩺 טופס מוריה</button>
+        <button type="button" class="tb-btn" style="background:#69b9df;color:white;border-color:#69b9df" onclick="quickInsertManhattanWidget()" title="מוסיף את טופס מנהטן (בדיקת התאמה) בלי צורך בקוד">🔬 טופס מנהטן</button>
         <div class="tb-sep"></div>
         <button type="button" class="tb-btn" onclick="fmt('undo')">↩</button>
         <button type="button" class="tb-btn" onclick="fmt('redo')">↪</button>
@@ -1248,11 +1249,13 @@ function insertBlock() {
 // שיהיה ברור לצוות/ללקוחה איזה טופס נבחר — לא מוסתר מאחורי דיאלוג נוסף.
 var WIDGET_FORMS = {
   kupot: { file: 'kupot_multistep_exact_v14.html', label: 'טופס קופות החולים', embedHeight: 520 },
-  moria: { file: 'form-multi-steps-moria.html',    label: 'טופס מוריה',          embedHeight: 760 }
+  moria: { file: 'form-multi-steps-moria.html',    label: 'טופס מוריה',          embedHeight: 760 },
+  manhattan: { file: 'manhattan_form.html',        label: 'טופס מנהטן (בדיקת התאמה)', embedHeight: 560 }
 };
 
 function quickInsertKupotWidget() { quickInsertWidget('kupot'); }
 function quickInsertMoriaWidget() { quickInsertWidget('moria'); }
+function quickInsertManhattanWidget() { quickInsertWidget('manhattan'); }
 
 function quickInsertWidget(which) {
   var w = WIDGET_FORMS[which];
@@ -1528,8 +1531,12 @@ function insertPopupEmbed() {
   overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center';
   overlay.setAttribute('onclick', 'if(event.target===this)this.style.display="none"');
 
+  // רוב הווידג'טים (קופות/מוריה) שקופים ומסתמכים על הקופסה הלבנה כדי
+  // להיראות טוב. טופס מנהטן כבר בנוי עם כרטיס כחול משלו — רקע לבן מאחוריו
+  // יוצר "הילה" לבנה מיותרת סביבו, אז מדלגים עליו רק בשבילו.
+  var isManhattanForm = code.indexOf('manhattan_form.html') !== -1;
   var box = document.createElement('div');
-  box.style.cssText = 'position:relative;width:min(600px,95vw);height:min(760px,92vh);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);background:#fff';
+  box.style.cssText = 'position:relative;width:min(600px,95vw);height:min(760px,92vh);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5)' + (isManhattanForm ? '' : ';background:#fff');
 
   var closeBtn = document.createElement('button');
   closeBtn.setAttribute('onclick', 'document.getElementById("'+uid+'").style.display="none"');

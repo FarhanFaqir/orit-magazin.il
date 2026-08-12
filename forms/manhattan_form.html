@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>טופס בדיקת התאמה</title>
+
+<style>
+:root{
+  --blue:#69b9df;
+  --orange:#ff8a16;
+  --white:#ffffff;
+  --text:#777;
+  --border:#5f676d;
+  --green:#53a949;
+  --shadow:0 22px 48px rgba(0,0,0,.46);
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  background:transparent;
+}
+
+body{
+  padding:14px 12px 14px 8px;
+  overflow:visible;
+}
+
+html{
+  padding:0;
+
+  font-family:Arial,"Assistant","Heebo",sans-serif;
+}
+
+.form-card{
+  width:min(102%,635px);
+  margin:0 auto;
+  background:var(--blue);
+  border-radius:26px;
+  box-shadow:14px 12px 28px rgba(0,0,0,.20), 8px 4px 18px rgba(0,0,0,.10);
+  padding:25px 16px 15px;
+  overflow:hidden;
+}
+
+.form-title{
+  margin:0 auto 15px;
+  max-width:590px;
+  color:#fff;
+  text-align:center;
+  font-size:clamp(22px,4vw,30px);
+  line-height:1.4;
+  font-weight:700;
+}
+
+.progress{
+  width:80%;
+  margin:0 auto 15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;
+  direction:rtl;
+}
+
+.progress::before{
+  content:"";
+  position:absolute;
+  right:18px;
+  left:18px;
+  top:50%;
+  height:2px;
+  background:rgba(255,255,255,.38);
+  transform:translateY(-50%);
+}
+
+.dot{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:#fff;
+  color:#c4c7ca;
+  display:grid;
+  place-items:center;
+  font-size:15px;
+  position:relative;
+  z-index:1;
+}
+
+.dot.active{
+  color:var(--green);
+  border:2px solid var(--green);
+}
+
+.dot.done{
+  color:#fff;
+  background:var(--green);
+}
+
+.page{
+  display:none;
+  animation:fade .18s ease;
+}
+.page.active{display:block}
+.first-step-title.hidden{display:none}
+
+@keyframes fade{
+  from{opacity:.35;transform:translateY(5px)}
+  to{opacity:1;transform:none}
+}
+
+.field{
+  width:100%;
+  height:53px;
+  border:1.5px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  color:#555;
+  font:inherit;
+  font-size:18px;
+  padding:0 18px;
+  margin-bottom:10px;
+  text-align:right;
+  outline:none;
+}
+
+.field::placeholder{color:#91969a}
+
+.field:focus{
+  border-color:#315f79;
+  box-shadow:0 0 0 3px rgba(49,95,121,.13);
+}
+
+.next-btn{
+  width:100%;
+  height:53px;
+  border:0;
+  border-radius:18px;
+  background:var(--orange);
+  color:#fff;
+  font:700 26px/1 Arial,"Assistant","Heebo",sans-serif;
+  cursor:pointer;
+  box-shadow:inset 0 0 0 1px rgba(130,70,10,.25);
+}
+
+.question{
+  color:#fff;
+  text-align:center;
+  font-size:25px;
+  font-weight:700;
+  line-height:1.35;
+  margin:0 0 16px;
+}
+
+.options{
+  display:grid;
+  gap:10px;
+}
+
+.option{
+  width:100%;
+  min-height:48px;
+  border:1.5px solid var(--border);
+  border-radius:17px;
+  background:#fff;
+  color:#666;
+  font:400 19px/1.25 Arial,"Assistant","Heebo",sans-serif;
+  padding:9px 16px;
+  cursor:pointer;
+  text-align:center;
+  transition:.12s ease;
+}
+
+.option:hover,
+.option:focus{
+  border-color:var(--green);
+  outline:none;
+}
+
+.option.selected{
+  border:3px solid var(--green);
+  background:#fbfffb;
+}
+
+.bottom-progress{
+  margin-top:18px;
+  margin-bottom:10px;
+}
+
+.small-note{
+  color:#fff;
+  text-align:center;
+  font-size:14px;
+  line-height:1.5;
+  margin:12px 4px 0;
+}
+
+@media(max-width:560px){
+  body{padding:10px 8px 10px 6px;}
+
+  .form-card{
+    border-radius:22px;
+    padding:20px 14px 14px;
+  }
+  .form-title{
+    font-size:25px;
+    margin-bottom:10px;
+  }
+  .progress{
+    width:88%;
+    margin-bottom:10px;
+  }
+  .dot{
+    width:28px;
+    height:28px;
+    font-size:12px;
+  }
+  .field{
+    height:50px;
+    border-radius:15px;
+    font-size:13px;
+    margin-bottom:10px;
+  }
+  .next-btn{
+    height:50px;
+    border-radius:15px;
+    font-size:24px;
+  }
+  .question{
+    font-size:23px;
+    margin-bottom:10px;
+  }
+  .option{
+    min-height:46px;
+    border-radius:15px;
+    font-size:20px;
+  }
+}
+
+.first-page-field{
+  font-size:24px;
+}
+@media(max-width:560px){
+  .first-page-field{
+    font-size:21px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- שליחה עוברת ב-JS ל-Firebase + לגיליון (submitForm/saveLead למטה), לא
+     לטופס Netlify — onsubmit חוסם כל שליחה טבעית (למשל Enter במקלדת) -->
+<form
+  id="leadForm"
+  class="form-card"
+  name="skin-lesion-lead"
+  onsubmit="return false"
+>
+  <h2 class="form-title first-step-title">מעוניינים להסיר נקודת חן או נגע עור? השאירו פרטים כאן:</h2>
+
+  <!-- שלב 1: שם + טלפון יחד -->
+  <section class="page active" data-step="1">
+    <input class="field first-page-field" type="text" name="full_name" placeholder="שם מלא" autocomplete="name" required>
+    <input class="field first-page-field" type="tel" name="phone" placeholder="טלפון נייד" autocomplete="tel" inputmode="tel" required>
+    <button class="next-btn" type="button" id="firstNext">הבא</button>
+  </section>
+
+  <!-- שלב 2: שאלה אחת בלבד, מעבר אוטומטי -->
+  <section class="page" data-step="2">
+    <div class="question">מה קבוצת הגיל?</div>
+    <div class="options" data-field="age_group">
+      <button class="option" type="button" data-value="עד 25">עד 25</button>
+      <button class="option" type="button" data-value="26-35"><span dir="ltr">26–35</span></button>
+      <button class="option" type="button" data-value="36-45"><span dir="ltr">36–45</span></button>
+      <button class="option" type="button" data-value="46-55"><span dir="ltr">46–55</span></button>
+      <button class="option" type="button" data-value="56 ומעלה">56 ומעלה</button>
+    </div>
+    <input type="hidden" name="age_group" required>
+  </section>
+
+  <!-- שלב 3: שאלה אחת בלבד, מעבר אוטומטי -->
+  <section class="page" data-step="3">
+    <div class="question">מה מעוניינים להסיר?</div>
+    <div class="options" data-field="lesion_type">
+      <button class="option" type="button" data-value="נקודות חן / שומות">נקודות חן / שומות</button>
+      <button class="option" type="button" data-value="סרחי עור">סרחי עור</button>
+      <button class="option" type="button" data-value="נקודות חן אדומות">נקודות חן אדומות</button>
+      <button class="option" type="button" data-value="כתמי גיל">כתמי גיל</button>
+      <button class="option" type="button" data-value="שומנים בעיניים / קסנטלזמה">שומנים בעיניים</button>
+      <button class="option" type="button" data-value="נגע אחר / לא בטוח">נגע אחר / לא בטוח</button>
+    </div>
+    <input type="hidden" name="lesion_type" required>
+  </section>
+
+  <!-- שלב 4: שאלה אחת בלבד, הבחירה שולחת ומעבירה לדף תודה -->
+  <section class="page" data-step="4">
+    <div class="question">מה הקליניקה הקרובה אליכם?</div>
+    <div class="options" data-field="nearest_clinic" data-submit="true">
+      <button class="option" type="button" data-value="בני ברק / רמת גן">בני ברק / רמת גן</button>
+      <button class="option" type="button" data-value="נתניה">נתניה</button>
+      <button class="option" type="button" data-value="חיפה">חיפה</button>
+    </div>
+    <input type="hidden" name="nearest_clinic" required>
+  </section>
+
+  <div class="progress bottom-progress" aria-label="התקדמות">
+    <div class="dot active" data-dot="1">1</div>
+    <div class="dot" data-dot="2">2</div>
+    <div class="dot" data-dot="3">3</div>
+    <div class="dot" data-dot="4">4</div>
+  </div>
+</form>
+
+<!-- Firebase — this widget runs in its own iframe, so it loads its own copy -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script>
+(function(){
+  const form = document.getElementById('leadForm');
+  const pages = [...form.querySelectorAll('.page')];
+  const dots = [...form.querySelectorAll('.dot')];
+  const firstNext = document.getElementById('firstNext');
+  let currentStep = 1;
+  let submitting = false;
+
+  function showStep(step){
+    currentStep = step;
+
+    pages.forEach(page => {
+      page.classList.toggle('active', Number(page.dataset.step) === step);
+    });
+
+    dots.forEach(dot => {
+      const n = Number(dot.dataset.dot);
+      dot.classList.toggle('active', n === step);
+      dot.classList.toggle('done', n < step);
+    });
+
+    const title = form.querySelector('.first-step-title');
+    if(title){
+      title.classList.toggle('hidden', step !== 1);
+    }
+
+    // .page משתמש ב-display:none/block אמיתי (לא position:absolute כמו
+    // במוריה), אז הגובה הטבעי של הדף כבר משקף רק את השלב הפעיל — אין
+    // צורך במדידה מיוחדת, מספיק לדווח מחדש אחרי כל מעבר שלב.
+    reportWidgetHeight();
+  }
+
+  function validateFirstPage(){
+    const name = form.querySelector('[name="full_name"]');
+    const phone = form.querySelector('[name="phone"]');
+
+    if(!name.checkValidity()){
+      name.reportValidity();
+      return false;
+    }
+
+    if(!phone.checkValidity()){
+      phone.reportValidity();
+      return false;
+    }
+
+    return true;
+  }
+
+  firstNext.addEventListener('click', function(){
+    if(validateFirstPage()) showStep(2);
+  });
+
+  form.querySelectorAll('.options').forEach(group => {
+    const fieldName = group.dataset.field;
+    const hidden = form.querySelector(`[name="${fieldName}"]`);
+
+    group.querySelectorAll('.option').forEach(button => {
+      button.addEventListener('click', async function(){
+        if(submitting) return;
+
+        group.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
+        button.classList.add('selected');
+        hidden.value = button.dataset.value;
+
+        // תחושה של בחירה ואז מעבר אוטומטי
+        await new Promise(resolve => setTimeout(resolve, 180));
+
+        if(group.dataset.submit === 'true'){
+          submitting = true;
+          submitForm();
+        } else {
+          showStep(currentStep + 1);
+        }
+      });
+    });
+  });
+
+  // בונה קישור wa.me נקי (בלי הודעה מוכנה מראש) לעמודת "Wa link" בגיליון —
+  // הקישור העשיר (עם הטקסט) מיועד לכפתור שהגולש/ת עצמם לוחצים עליו, לא
+  // לתא בגיליון שאמור להיות קצר וקריא.
+  function buildCleanWaLink(phone){
+    const d=(phone||'').replace(/[^\d]/g,'');
+    const intl = d.replace(/^0/,'972');
+    return 'https://wa.me/'+intl;
+  }
+
+  // ── SAVE LEAD — Firebase (source of truth) + Manhattan Clinic sheet forward ──
+  // אותו דפוס בדיוק כמו קופות/מוריה — כדי שהליד הזה יופיע באותו גיליון,
+  // מתויג באותה צורה (site/ad-source ב-FormName).
+  function saveLead(lead){
+    const params = new URLSearchParams(location.search);
+    const timestamp = new Date().toLocaleString('he-IL');
+    let sourcePage = location.href;
+    try { if (window.parent && window.parent !== window) sourcePage = window.parent.location.href; } catch(e){}
+    let siteHost = '';
+    try { siteHost = new URL(sourcePage).hostname.replace(/^www\./,''); } catch(e){}
+    let adSource = '';
+    try {
+      const sp = new URL(sourcePage).searchParams;
+      adSource = sp.get('utm_source') || (sp.get('gclid')?'google':'') || (sp.get('fbclid')?'facebook':'') || (sp.get('ttclid')?'tiktok':'') || '';
+    } catch(e){}
+
+    const leadData = {
+      ...lead,
+      timestamp,
+      articleId: params.get('articleId') || '',
+      source: params.get('source') || 'widget'
+    };
+    if (typeof database === 'undefined') { console.error('❌ Firebase not loaded — lead not saved'); return Promise.resolve(); }
+    const firebaseSave = database.ref('leads').push(leadData).catch(err => console.error('❌ Firebase lead save failed:', err));
+
+    database.ref('settings/manhattanSheetsWebhookUrl').once('value').then(snap => {
+      const url = snap.val();
+      if (!url) return;
+      return fetch(url, { method:'POST', mode:'no-cors', body:new URLSearchParams({
+        Timestamp: timestamp,
+        Name: lead.name,
+        WaLink: buildCleanWaLink(lead.phone),
+        FormName: (siteHost ? siteHost+' - ' : '')+(adSource ? adSource+' - ' : '')+'manhattan-widget',
+        SourcePage: sourcePage,
+        Phone: lead.phone,
+        Fund: '',
+        Treatment: lead.lesion,
+        Age: lead.age,
+        Clinic: lead.clinic
+      })});
+    }).catch(err => console.error('❌ Sheets forward failed:', err));
+
+    return Promise.race([firebaseSave, new Promise(res => setTimeout(res, 1500))]);
+  }
+
+  function submitForm(){
+    const data = new FormData(form);
+    const lead = {
+      name: data.get('full_name') || '',
+      phone: data.get('phone') || '',
+      age: data.get('age_group') || '',
+      lesion: data.get('lesion_type') || '',
+      clinic: data.get('nearest_clinic') || ''
+    };
+
+    const whatsappMessage = [
+      'הגעתי מהכתבה מגזין ישראל',
+      'אשמח לייעוץ חינם',
+      '',
+      'שם: '+lead.name,
+      'רוצה להסיר: '+lead.lesion,
+      'קבוצת גיל: '+lead.age,
+      'קליניקה מועדפת: '+lead.clinic,
+      'טלפון: '+lead.phone
+    ].join('\n');
+    const waLink = 'https://wa.me/972552235439?text='+encodeURIComponent(whatsappMessage);
+
+    saveLead(lead).finally(() => {
+      // יציאה מה-iframe (מוטמע/פופאפ) לעמוד תודה מלא — window.top גם
+      // עובד תקין אם הווידג'ט נפתח ישירות (לא בתוך iframe).
+      const articleId = new URLSearchParams(location.search).get('articleId') || '';
+      const thankUrl = '../thank-you.html?name='+encodeURIComponent(lead.name)+'&form=manhattan&wa='+encodeURIComponent(waLink)+'&articleId='+encodeURIComponent(articleId);
+      try { (window.top||window).location.href = thankUrl; } catch(e){ location.href = thankUrl; }
+    });
+  }
+
+  // ── WIDGET AUTO-HEIGHT ──
+  // document.documentElement.scrollHeight תמיד לפחות בגודל ה-viewport
+  // הנוכחי (זו התנהגות דפדפן קבועה לאלמנט השורש, גם בלי שום CSS
+  // שמכריח height:100vh) — בדיוק אותה מלכודת עצמית שהייתה בקופות/מוריה:
+  // דיווח → ההורה מגדיל את האייפריים → 'resize' כאן → מדידה חוזרת שכבר
+  // כוללת את הגודל החדש → וחוזר חלילה עד לתקרה הקשיחה ב-article.html.
+  // .form-card הוא אלמנט זרימה רגיל — לא ה-root — אז הגובה שלו תמיד
+  // משקף רק את התוכן האמיתי, בלי תלות בגודל הנוכחי של הקופסה.
+  function reportWidgetHeight(){
+    const card = document.querySelector('.form-card');
+    const bodyStyle = getComputedStyle(document.body);
+    const h = card
+      ? card.getBoundingClientRect().height + parseFloat(bodyStyle.paddingTop) + parseFloat(bodyStyle.paddingBottom)
+      : document.documentElement.scrollHeight;
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({type:'manhattan-widget-height', height: Math.ceil(h) + 12}, '*');
+    }
+  }
+  window.addEventListener('load', reportWidgetHeight);
+  window.addEventListener('resize', reportWidgetHeight);
+  setTimeout(reportWidgetHeight, 250);
+  // בפופאפ, ה-iframe יושב ב-overlay שמתחיל display:none אצל ההורה — מדידה
+  // בזמן שהוא מוסתר לא אמינה. ResizeObserver תופס את הרגע שבו ההורה עובר
+  // ל-display:flex (הגודל של ה-iframe עצמו משתנה) ומודד מיד אז.
+  if (window.ResizeObserver) {
+    new ResizeObserver(reportWidgetHeight).observe(document.documentElement);
+  }
+})();
+</script>
+
+</body>
+</html>
