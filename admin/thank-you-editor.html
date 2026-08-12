@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עריכת עמוד תודה - ישראל מגזין</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    direction: rtl;
+    padding: 20px;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    color: #c8352a;
+  }
+
+  .info-box {
+    background: #e3f2fd;
+    border-right: 4px solid #2196F3;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 25px;
+    color: #0d47a1;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+
+  .panel {
+    background: white;
+    padding: 25px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .panel h2 { font-size: 1.2rem; margin-bottom: 15px; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 0.9rem; }
+  .field input, .field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.95rem;
+  }
+  .field textarea { min-height: 90px; resize: vertical; }
+  .field .hint { font-size: 0.78rem; color: #999; margin-top: 4px; }
+
+  .button-group { display: flex; gap: 10px; margin-top: 20px; }
+  button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .save-btn { background: #c8352a; color: white; }
+  .save-btn:hover { background: #a82a21; }
+  .reset-btn { background: #eee; color: #333; }
+  .reset-btn:hover { background: #ddd; }
+
+  .status { margin-top: 12px; font-size: 0.85rem; padding: 8px 12px; border-radius: 4px; display: none; }
+  .status.show { display: block; }
+  .status.success { background: #e8f5e9; color: #2e7d32; }
+  .status.error { background: #ffebee; color: #c62828; }
+
+  /* live preview — mirrors thank-you.html's own .thanks-* styles exactly */
+  .preview-frame {
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 20px 5vw;
+    position: sticky;
+    top: 20px;
+  }
+  .thanks-wrap { max-width: 460px; margin: 0 auto; padding: 2rem 0 1rem; text-align: center; }
+  .thanks-check {
+    width: 74px; height: 74px; border-radius: 50%;
+    background: #ECFDF5; border: 2px solid #B7F0D0; color: #16A34A;
+    font-size: 2.1rem; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.3rem;
+  }
+  .thanks-title { font-size: 1.9rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 0.7rem; }
+  .thanks-title span { color: #c8352a; }
+  .thanks-info { font-size: 1rem; color: #6b6b6b; line-height: 1.7; max-width: 400px; margin: 0 auto 2rem; }
+  .thanks-wa {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    background: #25D366; color: #fff; text-decoration: none; font-weight: 800;
+    font-size: 1rem; padding: 15px 32px; border-radius: 40px;
+    box-shadow: 0 10px 28px rgba(37,211,102,.3);
+  }
+  .thanks-back { display: block; margin-top: 2rem; font-size: 0.85rem; color: #6b6b6b; text-decoration: none; }
+
+  .test-link { display: inline-block; margin-top: 20px; color: #c8352a; text-decoration: none; font-weight: 700; }
+
+  .pixel-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .pixel-group { background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 16px; }
+  .pixel-group h3 { font-size: 1rem; margin-bottom: 12px; color: #555; }
+  .pixel-group textarea { min-height: 220px; font-family: monospace; font-size: 0.82rem; direction: ltr; text-align: left; }
+  @media (max-width: 800px) { .layout, .pixel-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🙏 עריכת עמוד תודה</h1>
+
+  <div class="info-box">
+    כאן עורכים את <strong>התוכן הקבוע</strong> של עמוד התודה (כותרת, טקסט, כפתור וואטסאפ) וגם את
+    <strong>קודי הפרסום שרצים בעמוד הזה</strong> (Taboola/Outbrain/Google/Meta).
+    <br>
+    לתשומת לב: כשליד אמיתי ממלא טופס, שמו וקישור הוואטסאפ האישי שלו <strong>מחליפים אוטומטית</strong>
+    את מה שמוגדר כאן — זה קורה בקוד עצמו ואי אפשר לערוך את זה מפה.
+    Google Tag Manager הכללי (שרץ בכל האתר, לא רק כאן) עדיין מנוהל ב<a href="code-manager.html">📊 קודים</a>.
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>תוכן העמוד</h2>
+
+      <div class="field">
+        <label>כותרת (כשאין שם ליד)</label>
+        <input id="fieldTitle" type="text" placeholder="תודה!">
+        <div class="hint">כשליד שולח טופס עם שם, הכותרת הופכת אוטומטית ל״תודה, [שם]!״</div>
+      </div>
+
+      <div class="field">
+        <label>טקסט הסבר</label>
+        <textarea id="fieldText" placeholder="קיבלנו את הפרטים שלך בהצלחה..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>טקסט כפתור הוואטסאפ</label>
+        <input id="fieldButtonText" type="text" placeholder="המשך בוואטסאפ">
+      </div>
+
+      <div class="field">
+        <label>מספר וואטסאפ (ברירת מחדל)</label>
+        <input id="fieldWhatsapp" type="text" placeholder="0552235439" dir="ltr" style="text-align:right">
+        <div class="hint">משמש רק כשאין קישור וואטסאפ אישי מהליד (למשל ביקור ישיר בעמוד). פורמט: 05XXXXXXXX.</div>
+      </div>
+    </div>
+
+    <div class="panel preview-frame">
+      <div class="thanks-wrap">
+        <div class="thanks-check">✓</div>
+        <h1 class="thanks-title" id="prevTitle">תודה!</h1>
+        <p class="thanks-info" id="prevText">קיבלנו את הפרטים שלך בהצלחה.</p>
+        <a class="thanks-wa" id="prevWaBtn" href="#" onclick="return false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span id="prevButtonText">המשך בוואטסאפ</span>
+        </a>
+        <a href="#" class="thanks-back" onclick="return false">← חזרה לעמוד הבית</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:25px">
+    <h2>🎯 קודי פרסום לעמוד תודה</h2>
+    <div class="hint" style="margin-bottom:18px">
+      אלה רצים בכל טעינה של עמוד התודה (לא רק כשליד אמיתי נשלח) — כך שכלים
+      כמו Google Tag Assistant מזהים אותם גם בבדיקה רגילה. את Google Tag
+      Manager הכללי (שרץ בכל האתר) מנהלים ב<a href="code-manager.html">📊 קודים</a>, לא כאן.
+    </div>
+
+    <div class="pixel-grid">
+      <div class="pixel-group">
+        <h3>Taboola</h3>
+        <div class="field">
+          <label>Base Pixel</label>
+          <textarea id="fieldTaboolaBase" placeholder="הדביקי כאן את קוד ה-Base Pixel"></textarea>
+        </div>
+        <div class="field">
+          <label>Conversion Event</label>
+          <textarea id="fieldTaboolaConv" placeholder="הדביקי כאן את קוד ההמרה"></textarea>
+        </div>
+      </div>
+
+      <div class="pixel-group">
+        <h3>Outbrain</h3>
+        <div class="field">
+          <label>Base Pixel</label>
+          <textarea id="fieldOutbrainBase" placeholder="הדביקי כאן את קוד ה-Base Pixel"></textarea>
+        </div>
+        <div class="field">
+          <label>Conversion Event</label>
+          <textarea id="fieldOutbrainConv" placeholder="הדביקי כאן את קוד ההמרה"></textarea>
+        </div>
+      </div>
+
+      <div class="pixel-group">
+        <h3>Google Ads</h3>
+        <div class="field">
+          <label>Google Tag</label>
+          <textarea id="fieldGoogleBase" placeholder="הדביקי כאן את Google Tag"></textarea>
+        </div>
+        <div class="field">
+          <label>Conversion Event</label>
+          <textarea id="fieldGoogleConv" placeholder="הדביקי כאן את Conversion Event"></textarea>
+        </div>
+      </div>
+
+      <div class="pixel-group">
+        <h3>Meta / Facebook</h3>
+        <div class="field">
+          <label>Meta Base Pixel</label>
+          <textarea id="fieldMetaBase" placeholder="הדביקי כאן את Meta Pixel Base Code"></textarea>
+        </div>
+        <div class="field">
+          <label>Lead Event</label>
+          <textarea id="fieldMetaConv" placeholder="לדוגמה: fbq('track','Lead');"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="button-group">
+    <button class="save-btn" onclick="saveSettings()">💾 שמור הכל</button>
+    <button class="reset-btn" onclick="resetSettings()">↩️ אפס לברירת מחדל</button>
+  </div>
+
+  <div class="status" id="statusMsg"></div>
+
+  <a href="../thank-you.html" target="_blank" class="test-link">👈 פתח את עמוד התודה בפועל</a>
+  <br>
+  <a href="/" class="test-link">👈 חזור לעמוד הבית</a>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script>
+// חייב להתאים בדיוק לברירות המחדל הקשיחות שב-thank-you.html, כדי שמסך
+// "אפס לברירת מחדל" וה-placeholder-ים יציגו בדיוק את מה שמוצג היום
+// לביקור ישיר בעמוד (בלי name/wa בכתובת).
+const DEFAULTS = {
+  title: 'תודה!',
+  text: 'קיבלנו את הפרטים שלך בהצלחה. אחת מהיועצות שלנו תחזור אליך בהקדם לתיאום פגישת ייעוץ חינמית בקליניקה שבחרת.',
+  buttonText: 'המשך בוואטסאפ',
+  whatsapp: '0552235439',
+  // כבר רצו בפועל בעמוד (הועברו לכאן כדי שיהיו ניתנים לעריכה) — לא ריקים
+  // כמו Google/Meta, כי הם כבר מוגדרים ופעילים.
+  taboolaBase: "<!-- Taboola Pixel Code -->\n<script type='text/javascript'>\n  window._tfa = window._tfa || [];\n  window._tfa.push({notify: 'event', name: 'page_view', id: 1595397});\n  !function (t, f, a, x) {\n         if (!document.getElementById(x)) {\n            t.async = 1;t.src = a;t.id=x;f.parentNode.insertBefore(t, f);\n         }\n  }(document.createElement('script'),\n  document.getElementsByTagName('script')[0],\n  '//cdn.taboola.com/libtrc/unip/1595397/tfa.js',\n  'tb_tfa_script');\n<\/script>\n<!-- End of Taboola Pixel Code -->",
+  taboolaConv: "<script>\n    _tfa.push({notify: 'event', name: 'Magazine_Lead', id: 1595397});\n<\/script>",
+  outbrainBase: "<script data-obct type='text/javascript'>\n  /** DO NOT MODIFY THIS CODE**/\n  !function(_window, _document) {\n    var OB_ADV_ID = '008c7f3aba2eb9a80d9514926ffb24f2cb';\n    if (_window.obApi) {\n      var toArray = function(object) {\n        return Object.prototype.toString.call(object) === '[object Array]' ? object : [object];\n      };\n      _window.obApi.marketerId = toArray(_window.obApi.marketerId).concat(toArray(OB_ADV_ID));\n      return;\n    }\n    var api = _window.obApi = function() {\n      api.dispatch ? api.dispatch.apply(api, arguments) : api.queue.push(arguments);\n    };\n    api.version = '1.1';\n    api.loaded = true;\n    api.marketerId = OB_ADV_ID;\n    api.queue = [];\n    var tag = _document.createElement('script');\n    tag.async = true;\n    tag.src = '//amplify.outbrain.com/cp/obtp.js';\n    tag.type = 'text/javascript';\n    var script = _document.getElementsByTagName('script')[0];\n    script.parentNode.insertBefore(tag, script);\n  }(window, document);\n  obApi('track', 'PAGE_VIEW');\n<\/script>",
+  outbrainConv: "<script>\n    obApi('track', 'Lead-magazin');\n<\/script>",
+  googleBase: '', googleConv: '', metaBase: '', metaConv: ''
+};
+
+const fields = {
+  title: document.getElementById('fieldTitle'),
+  text: document.getElementById('fieldText'),
+  buttonText: document.getElementById('fieldButtonText'),
+  whatsapp: document.getElementById('fieldWhatsapp'),
+  taboolaBase: document.getElementById('fieldTaboolaBase'),
+  taboolaConv: document.getElementById('fieldTaboolaConv'),
+  outbrainBase: document.getElementById('fieldOutbrainBase'),
+  outbrainConv: document.getElementById('fieldOutbrainConv'),
+  googleBase: document.getElementById('fieldGoogleBase'),
+  googleConv: document.getElementById('fieldGoogleConv'),
+  metaBase: document.getElementById('fieldMetaBase'),
+  metaConv: document.getElementById('fieldMetaConv')
+};
+
+function updatePreview() {
+  document.getElementById('prevTitle').textContent = fields.title.value || DEFAULTS.title;
+  document.getElementById('prevText').textContent = fields.text.value || DEFAULTS.text;
+  document.getElementById('prevButtonText').textContent = fields.buttonText.value || DEFAULTS.buttonText;
+}
+Object.values(fields).forEach(f => f.addEventListener('input', updatePreview));
+
+function fillForm(settings) {
+  Object.keys(fields).forEach(key => { fields[key].value = settings[key] || ''; });
+  updatePreview();
+}
+
+database.ref('settings/thankYouPage').once('value').then(snap => {
+  fillForm(snap.val() || DEFAULTS);
+}).catch(err => {
+  console.error('❌ Failed to load thank-you page settings:', err);
+  fillForm(DEFAULTS);
+});
+
+function showStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = 'status show ' + type;
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function saveSettings() {
+  const settings = {};
+  Object.keys(fields).forEach(key => { settings[key] = fields[key].value.trim(); });
+  database.ref('settings/thankYouPage').set(settings)
+    .then(() => showStatus('✅ נשמר בהצלחה — עמוד התודה יראה את זה מיד', 'success'))
+    .catch(err => { console.error(err); showStatus('❌ שגיאה בשמירה', 'error'); });
+}
+
+function resetSettings() {
+  if (!confirm('לאפס את כל השדות לברירת המחדל?')) return;
+  database.ref('settings/thankYouPage').set(DEFAULTS)
+    .then(() => { fillForm(DEFAULTS); showStatus('↩️ אופס לברירת מחדל', 'success'); })
+    .catch(err => { console.error(err); showStatus('❌ שגיאה באיפוס', 'error'); });
+}
+</script>
+</body>
+</html>

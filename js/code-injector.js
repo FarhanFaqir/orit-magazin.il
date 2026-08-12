@@ -7,11 +7,11 @@ function injectSavedCodes() {
   // אל תפעיל פיקסלים/אנליטיקס אמיתיים בתוך ה-iframe של תצוגה מקדימה חיה
   // בעורך — זו לא צפייה אמיתית של מבקר.
   if (new URLSearchParams(location.search).get('preview') === '1') return;
-  // עמוד התודה מכיל כבר ישירות בקוד המקור (hardcoded) את Taboola/Outbrain
-  // (כולל אירוע ה-Lead) ואת GTM-NG7D3XQG — לא דרך המערכת הדינמית הזו —
-  // כדי ש-Tag Assistant וכלי בדיקה דומים יזהו אותם בביקור רגיל, בלי צורך
-  // בהמרה אמיתית. לכן מדלגים כאן על tb/ob בעמוד הזה, אחרת הם היו יורים
-  // פעמיים (גם ישירות מהקוד, וגם דרך ההזרקה הכללית פה).
+  // עמוד התודה טוען את Taboola/Outbrain/Google/Meta שלו בעצמו, דינמית מ-
+  // settings/thankYouPage (נערך ב-admin/thank-you-editor.html) — לא דרך
+  // codes.tb/codes.ob הכלליים כאן. מדלגים עליהם בעמוד הזה כדי שלא יירו
+  // פעמיים. codes.gtm (כללי לכל האתר) כן ממשיך לרוץ כאן כרגיל, בלי שום
+  // תנאי — הוא רץ בכל טעינת עמוד, כולל ביקור ישיר בעמוד התודה.
   var isThankYouPage = /(^|\/)thank-you\.html$/.test(location.pathname);
   getStoredCodes().then(codes => {
     if (!codes) return;
@@ -22,20 +22,6 @@ function injectSavedCodes() {
     if (codes.tb && !isThankYouPage) injectCustomCode(codes.tb);
     if (codes.ob && !isThankYouPage) injectCustomCode(codes.ob);
     if (codes.custom) injectCustomCode(codes.custom);
-    // קוד המרה ייעודי לעמוד תודה (Facebook Lead event / Google Ads
-    // conversion וכו') — צריך לרוץ פעם אחת, רק כשליד באמת נשלח, לא בכל
-    // ביקור ישיר/רענון/שיתוף של הקישור. הטופס מסמן דגל חד-פעמי ב-
-    // sessionStorage ממש לפני ההפניה; אם הדגל לא קיים, זו לא המרה
-    // אמיתית ולא מזריקים את הפיקסל. הדגל מוסר מיד אחרי הבדיקה כדי
-    // שרענון של העמוד לא יירה שוב.
-    if (codes.thankYou && /(^|\/)thank-you\.html$/.test(location.pathname)) {
-      var isRealConversion = false;
-      try { isRealConversion = sessionStorage.getItem('pulsar_conversion_pending') === '1'; } catch (e) {}
-      if (isRealConversion) {
-        try { sessionStorage.removeItem('pulsar_conversion_pending'); } catch (e) {}
-        injectCustomCode(codes.thankYou);
-      }
-    }
   }).catch(err => console.error('❌ Failed to load tracking codes:', err));
 }
 
