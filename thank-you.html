@@ -144,8 +144,11 @@ const articleId = params.get('articleId');
 if (name) {
   document.getElementById('thanksTitle').innerHTML = 'תודה, <span>' + name.replace(/</g,'&lt;') + '</span>!';
 }
-if (wa) {
-  document.getElementById('thanksWaBtn').href = wa;
+// כפתור הוואטסאפ מוסתר כרגע (ה-HTML שלו בהערה) — לכן חייבים בדיקת קיום
+// לפני נגיעה בו, אחרת שגיאת null עוצרת את שאר הסקריפט בעמוד.
+const waBtn = document.getElementById('thanksWaBtn');
+if (wa && waBtn) {
+  waBtn.href = wa;
 }
 // חזרה לכתבה שממנה הגיע הטופס, לא לדף הבית — נופל חזרה לדף הבית רק אם
 // הגיעו לכאן בלי articleId (למשל ביקור ישיר בעמוד)
@@ -196,21 +199,27 @@ database.ref('settings/thankYouPage').once('value').then(snap => {
   const settings = snap.val();
   if (!settings) return;
 
-  if (!name && settings.title) {
-    document.getElementById('thanksTitle').textContent = settings.title;
-  }
-  if (settings.text) {
-    document.getElementById('thanksText').textContent = settings.text;
-  }
-  if (settings.buttonText) {
-    document.getElementById('thanksButtonText').textContent = settings.buttonText;
-  }
-  if (!wa && settings.whatsapp) {
-    document.getElementById('thanksWaBtn').href = 'https://wa.me/' + normalizeILPhone(settings.whatsapp);
-  }
-
+  // קודי הפרסום קודם, ובאופן עצמאי — כדי ששגיאה בעדכון התוכן (למשל אלמנט
+  // שהוסתר ולא קיים יותר ב-DOM) לא תוכל שוב לחסום את ההמרות של
+  // טאבולה/אאוטבריין/גוגל/מטא, כמו שקרה כשכפתור הוואטסאפ הוסתר.
   ['taboolaBase','taboolaConv','outbrainBase','outbrainConv','googleBase','googleConv','metaBase','metaConv']
-    .forEach(key => { if (settings[key]) injectCustomCode(settings[key]); });
+    .forEach(key => {
+      if (!settings[key]) return;
+      try { injectCustomCode(settings[key]); }
+      catch (err) { console.error('❌ Failed to inject ' + key + ':', err); }
+    });
+
+  const title = document.getElementById('thanksTitle');
+  const text = document.getElementById('thanksText');
+  const btnText = document.getElementById('thanksButtonText');
+  const btn = document.getElementById('thanksWaBtn');
+
+  if (!name && settings.title && title) title.textContent = settings.title;
+  if (settings.text && text) text.textContent = settings.text;
+  if (settings.buttonText && btnText) btnText.textContent = settings.buttonText;
+  if (!wa && settings.whatsapp && btn) {
+    btn.href = 'https://wa.me/' + normalizeILPhone(settings.whatsapp);
+  }
 }).catch(err => console.error('❌ Failed to load thank-you page settings:', err));
 </script>
 </body>
