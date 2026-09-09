@@ -5,16 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ישראל מגזין | תודה</title>
 
-<!-- Google Ads Google tag — Thank You Page Only -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17023781097"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'AW-17023781097');
-</script>
-<!-- End Google Ads Google tag -->
+<!-- אין כאן Google Tag קשיח בכוונה. קונטיינר GTM-NG7D3XQG (נטען בכל
+     עמוד דרך settings/codes/gtm ו-js/code-injector.js) כבר עושה הכל:
+     • Google Tag של AW-17023781097 — נורה על gtm.init, בכל עמוד באתר.
+     • Conversion Linker — נורה על gtm.js, שומר את ה-gclid בעוגיית _gcl_aw.
+     • שתי המרות שנורות דווקא בעמוד הזה, על gtm.dom לפי הנתיב /thank-you:
+       label r_ooCl33g8gaEOmRybU_ ו-label GIMgCOL3r7kcEOmRybU_.
+     הסניפט שהיה מודבק כאן טען את אותה תגית פעם שנייה בעמוד הזה בלבד,
+     ו-Tag Assistant דיווח על התקנה כפולה — לכן הוסר. -->
  
 <!-- Google Tag Manager (GTM-NG7D3XQG) loads site-wide via admin/code-manager.html
      -> settings/codes/gtm, injected by js/code-injector.js on every page,

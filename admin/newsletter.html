@@ -160,19 +160,19 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="../js/firebase-config.js"></script>
+<!-- שער כניסה לניהול. חייב לבוא מיד אחרי firebase-config.js ולפני
+     הסקריפט של העמוד — אחרת הקריאות הראשונות ל-database יוצאות בלי
+     טוקן הזדהות ומקבלות permission_denied. -->
+<script src="../js/admin-auth.js"></script>
 <script>
-// ── AUTH (same gate + session as the main admin panel) ──
-(function(){
-  var PASS = '3426', KEY = 'pulsar_admin_auth';
-  if (sessionStorage.getItem(KEY) === 'ok') return;
-  var p = prompt('🔐 סיסמת ניהול:');
-  if (p === PASS) { sessionStorage.setItem(KEY, 'ok'); }
-  else {
-    document.body.innerHTML = '<div style="text-align:center;padding:4rem;font-family:sans-serif"><h2 style="color:#c8352a">גישה נדחתה</h2><p style="margin-top:1rem"><a href="../index.html">← חזרה לאתר</a></p></div>';
-    throw new Error('Unauthorized');
-  }
-})();
+// ── AUTH ──
+// שער הכניסה עבר ל-js/admin-auth.js (Firebase Auth), שנטען למעלה.
+// הגרסה הקודמת כאן הייתה prompt() עם הסיסמה כתובה בקוד המקור — כל אחד
+// יכול היה לקרוא אותה ב-View Source, והיא גם לא הגנה על המידע עצמו:
+// הבדיקה רצה בדפדפן, בזמן שה-Database השיב לכל בקשה בלי קשר אליה.
+// עכשיו ההרשאות נאכפות בשרת דרך Database Rules.
 
 let subscribers = [];
 
