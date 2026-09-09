@@ -90,3 +90,78 @@ Once I have those, I'll do the actual migration:
   - js/code-injector.js + admin/code-manager.html → tracking codes from Firebase
 
 ═════════════════════════════════════════════════════════════════
+
+═════════════════════════════════════════════════════════════════
+Step 7: Database Rules + admin login  (done — Sep 2026)
+─────────────────────────────────────────────────────────────────
+Why this was needed: the database was still on "Test mode" rules,
+which carry a hardcoded expiry date. That date passed, the rules
+flipped to deny-all, and every page broke at once — articles stopped
+loading (permission_denied at /articles) and js/code-injector.js
+could no longer read /settings/codes, so GTM and all the tracking
+pixels stopped firing too.
+
+The rules now live in the repo at firebase-database-rules.json.
+To apply: Firebase Console -> Realtime Database -> Rules ->
+paste the file contents -> Publish. No expiry date, so this
+cannot silently break again.
+
+What the rules allow:
+  articles                     public read, admin-only write
+  settings/codes               public read (code-injector needs it
+  settings/thankYouPage        on every page load), admin-only write
+  settings/sheetsWebhookUrl
+  settings/manhattanSheetsWebhookUrl
+  leads                        anyone may CREATE a new lead (the
+                               forms), only admin may read/delete
+  newsletter                   same as leads
+  everything else              admin only
+
+"admin" is NOT simply "any signed-in user". The API key in
+js/firebase-config.js is public (the site needs it), so once the
+Email/Password provider is on, anyone holding that key could register
+themselves an account. A rule of "auth != null" would hand them the
+whole database. So the rules name one specific account by its UID:
+
+  auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'
+
+That UID is not a secret and grants nothing on its own — without the
+account password it is only an identifier.
+
+Creating the admin account (one time):
+  1. Authentication -> Sign-in method -> enable Email/Password
+  2. Authentication -> Settings -> User actions -> UNCHECK
+     "Enable create (sign-up)"   <- blocks public self-registration
+  3. Authentication -> Users -> Add user -> pick the email + password
+     (this is the login; there is no default password in the code)
+  4. Copy the User UID into firebase-database-rules.json
+  5. Realtime Database -> Rules -> paste that file -> Publish
+
+To add a second admin later, change the rule to
+  auth.uid === '<uid one>' || auth.uid === '<uid two>'
+and Publish again. No node needs to be created in the data tree.
+
+The login screen itself is js/admin-auth.js, loaded by the five
+admin pages that touch the database (index, code-manager,
+thank-you-editor, leads, newsletter). It must stay loaded straight
+after js/firebase-config.js and before each page's own script —
+creating firebase.auth() first is what makes the Realtime Database
+SDK wait for the auth token instead of firing off unauthenticated
+reads that come back permission_denied.
+
+Note that the login screen is convenience, not security: it can be
+bypassed in DevTools. The actual protection is the rules above —
+without a signed-in user the server returns nothing.
+
+OPEN ITEM — statusAppConfig / statusAppLeads
+─────────────────────────────────────────────────────────────────
+These two nodes exist in the database but are not referenced
+anywhere in this codebase — they belong to some other app. The
+rules deliberately leave them open (read+write for everyone),
+which is exactly how they already were under the old Test mode
+rules, so publishing cannot break whatever uses them.
+
+That is a placeholder, not a decision. statusAppLeads may well
+hold personal data, and right now anyone with the database URL
+can read it. Once we know what owns these nodes, tighten them the
+same way /leads is tightened.

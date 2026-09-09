@@ -1,0 +1,51 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "articles": {
+      ".read": true,
+      ".write": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'"
+    },
+
+    "settings": {
+      "codes": {
+        ".read": true,
+        ".write": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'"
+      },
+      "thankYouPage": {
+        ".read": true,
+        ".write": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'"
+      },
+      "sheetsWebhookUrl": {
+        ".read": true,
+        ".write": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'"
+      },
+      "manhattanSheetsWebhookUrl": {
+        ".read": true,
+        ".write": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'"
+      },
+      "$other": {
+        ".read": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'",
+        ".write": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'"
+      }
+    },
+
+    "leads": {
+      ".read": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'",
+      "$leadId": {
+        ".write": "(auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2') || (!data.exists() && newData.exists())"
+      }
+    },
+
+    "statusAppConfig": { ".read": true, ".write": true },
+    "statusAppLeads":  { ".read": true, ".write": true },
+
+    "newsletter": {
+      ".read": "auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2'",
+      "$entryId": {
+        ".write": "(auth != null && auth.uid === '6boNPG3JnjUjXWHnJUGUSEr8cXz2') || (!data.exists() && newData.exists())"
+      }
+    }
+  }
+}
